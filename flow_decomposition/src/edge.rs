@@ -1,7 +1,10 @@
+#[derive(Clone)]
+
+
 pub struct Edge {
-    id: i64,
-    start_node: i64,
-    end_node: i64,
-    weight: i64,
-    string: String,
+    pub id: i64,
+    pub start_node: usize,
+    pub end_node: usize,
+    pub weight: i64,
+    pub string: String,
 }
