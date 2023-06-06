@@ -2,6 +2,7 @@ use std::fs;
 use std::cmp::min;
 use std::cmp::Ordering;
 use std::collections::HashSet;
+use std::collections::HashMap;
 use std::collections::VecDeque;
 mod edge;
 use crate::edge::Edge;
@@ -52,9 +53,11 @@ fn main() {
     let n_nodes : Node_id = n_nodes.parse().unwrap();
 
     let mut v: Vec<(usize, usize, i64, String,usize)> = Vec::new();
-    let mut edgelist: Vec<Vec<Edge>> = Vec::new();
+    let mut edgelist: Vec<HashMap<Edge_id, Edge>> = Vec::new();
+    let mut edgelist2: Vec<Vec<Edge>> = Vec::new();
 
     let emptylist : Vec<Edge> = Vec::new();
+    let empty : HashMap<Edge_id, Edge> = HashMap::new();
 
     // Check flow condition
     let mut indeg = vec![0; n_nodes];
@@ -63,7 +66,8 @@ fn main() {
 
     for i in 0..n_nodes {
         let emp = emptylist.clone();
-        edgelist.push(emp);
+        edgelist2.push(emp);
+        edgelist.push(empty.clone());
     }
 
     let rounds = (&values).len() / 4;
@@ -78,7 +82,8 @@ fn main() {
         
 
         let e = build_edge(id, node1, node2, nodeweight, (&values[i*4+4]).to_string());
-        edgelist[node1 as usize].push(e);
+        edgelist2[node1 as usize].push(e.clone());
+        edgelist[node1 as usize].insert(e.id, e);
         id += 1;
 
         // Check flow condition
@@ -106,8 +111,15 @@ fn main() {
     
 
     println!("***********************************************");
-    for node in &edgelist {
+    for node in &edgelist2 {
         for edge in node {
+            println!("Edge {} from {} to {} with weight {} and sequence {}.", edge.id, edge.start_node, edge.end_node, edge.weight, edge.string);
+        }
+    }
+
+    println!("+++++++++++++++++++++++++++++++++++++++++++++++++");
+    for node in &edgelist {
+        for (_, edge) in node {
             println!("Edge {} from {} to {} with weight {} and sequence {}.", edge.id, edge.start_node, edge.end_node, edge.weight, edge.string);
         }
     }
@@ -131,38 +143,52 @@ fn main() {
         println!("While queue size: {}", queue.len());
         // println!("{}", queue.len());
         // let node = queue.pop_front();
-        // let elist = edgelist.clone();
+        // let elist = edgelist2.clone();
         let node : Node_id = queue.pop_front().unwrap();
         if edgelist[node].is_empty() {
+            continue;
+        }
+        if edgelist2[node].is_empty() {
             continue;
         }
 
 
         // Find a cycle and the minimum flow of that cycle.
         let mut edges = Vec::new();
-        let mut min_flow = edgelist[node][0].weight;
+        let keys: Vec<_> = edgelist[node].keys().collect();
+        let mut min_flow2 = edgelist2[node][0].weight;
+        let mut min_flow = edgelist[node][keys[0]].weight;
         let mut visited : HashSet<Node_id> = HashSet::new();
         let mut counter = 0;
         let mut new_node = node;
         let mut one_cycle : Vec<Edge> = Vec::new();
+        // for key in &keys {
+        //     println!("Key: {}", key);
+        // }
         loop {
             // println!("Loop!");
             // println!("node {} != {} new_node", node, new_node);
-            // println!("&edgelist[new_node][counter].end_node {} != {} new_node", &edgelist[new_node][counter].end_node, new_node);
-            while visited.contains(&edgelist[new_node][counter].end_node) && &edgelist[new_node][counter].end_node != &node {
+            // println!("&edgelist2[new_node][counter].end_node {} != {} new_node", &edgelist2[new_node][counter].end_node, new_node);
+            // while visited.contains(&edgelist2[new_node][counter].end_node) && &edgelist2[new_node][counter].end_node != &node {
+            //     counter+=1;
+            //     // println!("Counter = {}", counter);
+            //     // println!("{} != {}", &edgelist2[new_node][counter].end_node, &node);
+            // }
+            let keys: Vec<_> = edgelist[new_node].keys().collect();
+            while visited.contains(&edgelist[new_node][keys[counter]].end_node) && &edgelist[new_node][keys[counter]].end_node != &node {
                 counter+=1;
-                // println!("Counter = {}", counter);
-                // println!("{} != {}", &edgelist[new_node][counter].end_node, &node);
             }
             // println!("Got through!");
-            let edge = &edgelist[new_node][counter];
+            let edge2 = &edgelist2[new_node][counter];
+            let edge = &edgelist[new_node][keys[counter]];
             one_cycle.push(edge.clone());
             // println!("From {} to {}", edge.start_node, edge.end_node);
             new_node = edge.end_node;
             visited.insert(new_node);
             edges.push(edge);
+            min_flow2 = min(min_flow2, edge.weight);
             min_flow = min(min_flow, edge.weight);
-            println!("Edge id: {}, edge weight: {} and min_flow: {}", edge.id, edge.weight, min_flow);
+            println!("Edge id: {}, edge weight: {}, min_flow: {} and min_flow2: {}", edge.id, edge.weight,min_flow, min_flow2);
             if new_node == node {
                 break;
             } else {
@@ -171,27 +197,36 @@ fn main() {
             counter = 0;
         }
         cycles.push(one_cycle.clone());
+        println!("PUSH!");
 
         // Remove weight of the cycle from the graph
         let mut edges_to_remove = Vec::new();
         for edge in one_cycle {
             println!("Edge {} from {} to {} in one_cycle", {edge.id}, edge.start_node, edge.end_node);
-            edgelist[edge.start_node][edge.end_node].weight -= min_flow;
-            if edgelist[edge.start_node][edge.end_node].weight == 0 {
+            // edgelist2[edge.start_node][edge.end_node].weight -= min_flow2;
+            if let Some(edge) = edgelist[edge.start_node].get_mut(&edge.id) {
+                edge.weight -= min_flow;
+            }
+            // if edgelist2[edge.start_node][edge.end_node].weight == 0 {
+            //     edges_to_remove.push((edge.clone(), edge.end_node));
+            // }
+            if edgelist[edge.start_node][&edge.id].weight == 0 {
                 edges_to_remove.push((edge.clone(), edge.end_node));
             }
         }
         edges_to_remove.sort_by(sort_tuple);
         for tup in edges_to_remove {
             let (edge, _) = tup;
-            edgelist[edge.start_node].swap_remove(edge.end_node);
+            // edgelist2[edge.start_node].swap_remove(edge.end_node);
+            edgelist[edge.start_node].remove(&edge.id);
         }
         println!("*** Edgelist after removing ***");
         for node in &edgelist {
-            for edge in node {
+            for (_, edge) in node {
                 println!("Edge {} from {} to {} with weight {} and sequence {}.", edge.id, edge.start_node, edge.end_node, edge.weight, edge.string);
             }
         }
+        queue.push_back(node);
     }
 
     println!("\n##### Next, the cycles: #####");
@@ -204,9 +239,8 @@ fn main() {
         }
     }
 
-// PROBLEM with edgelist, because several edges are to the same node.
+
 
 
 }
-
 
