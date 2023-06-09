@@ -8,6 +8,9 @@ use crate::edge::EdgeId;
 use crate::edge::Weight;
 
 
+pub type Edgelist = Vec<HashMap<EdgeId, Edge>>;
+
+
 // Reading the file
 fn read_file(path: &str) -> String {
     println!("Using file {}", path);

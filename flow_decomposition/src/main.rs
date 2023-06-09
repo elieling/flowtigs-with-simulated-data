@@ -1,18 +1,83 @@
-// use std::fs;
-use std::cmp::min;
-use std::collections::HashSet;
-// use std::collections::HashMap;
-use std::collections::VecDeque;
+// // use std::fs;
+// use std::cmp::min;
+// use std::collections::HashSet;
+// // use std::collections::HashMap;
+// use std::collections::VecDeque;
 mod edge;
 use crate::edge::Edge;
 // use crate::edge::build_edge;
-use crate::edge::NodeId;
+// use crate::edge::NodeId;
 // use crate::edge::EdgeId;
-// use crate::edge::Weight;
+use crate::edge::Weight;
 mod graph;
 use crate::graph::build_graph;
+use crate::graph::Edgelist;
+mod flow;
+use crate::flow::build_cycles;
+use crate::flow::print_cycles;
 
 
+// FUNCTION FOR SINGLE SAFE WALK
+// 
+
+// Function to get the next edge in the cycle. 
+// Returns the edge and its index in the cycle.
+fn next_edge(cycle: &Vec<Edge>, index: usize) -> (Edge, usize) {
+    let limit = cycle.len() - 1;
+    if index == limit {
+        return (cycle[0].clone(), 0);
+    }
+    return (cycle[index+1].clone(), index+1);
+}
+
+// Function to test the safety when adding an edge to the path. 
+// Returns whether it is safe and the remaining weight.  
+fn step (cycle: &Vec<Edge>, index: usize, weight: Weight, edgelist: &Edgelist) -> (bool, Weight) {
+    // println!("STEP");
+    let edge = cycle[index].clone();
+    // let start_node = edge.start_node;
+    let id = edge.id;
+    // let (_, next_id) = next_edge(cycle, index);
+    let neighbors = &edgelist[edge.start_node];
+    let mut weight = weight;
+    // println!("Edge: {}", edge.string);
+
+    let mut neighbor_weight = 0;
+    for (_, neigh) in neighbors {
+        // println!("neighbor {}, neigh_id {}, id {}", neigh.string, neigh.id, id);
+        if neigh.id != id {
+            neighbor_weight += neigh.weight;
+            // println!("neigh_weight: {}", neighbor_weight);
+        }
+    }
+
+    weight -= neighbor_weight;
+    let mut safety = false;
+    if weight > 0 {safety = true};
+    (safety, weight)
+}
+
+// Function that calculates the longest subwalk starting from a particular edge.
+// Returns a String of the longest path starting from the node.
+fn longest_subwalk(cycle: &Vec<Edge>, index: usize, edgelist: &Edgelist) -> String {
+    let mut longest_path = String::from("");
+    let mut index = index;
+    let original_edge = &cycle[index];
+    longest_path += &original_edge.string;
+    let mut weight_left = original_edge.weight;
+    loop {
+        let (edge, next_index) = next_edge(&cycle, index);
+        index = next_index;
+        let (safety, weight) = step(&cycle, index, weight_left, &edgelist); 
+        // println!("weight: {}", weight);
+        if safety {
+            longest_path.push(edge.last_char());
+            weight_left = weight;
+            if edge.id == original_edge.id {break;}
+        } else {break;}
+    }
+    longest_path
+}
 
 
 
@@ -21,111 +86,66 @@ fn main() {
     // -------------------------------------------------------------- 
     // let path = "../data/short_k13.edgelist";
     // let path = "../data/test_k12.edgelist";
-    let path = "../data/reference_k15.edgelist";
+    // let path = "../data/reference_k15.edgelist";
     // let path = "../data/long_k27.edgelist";
+    // let path = "../data/ecoli_k12.edgelist";
     // let path = "../data/fake.edgelist";
+
+    // Test files
+    let path = "../data/test_data/short.edgelist";
     // -------------------------------------------------------------- 
 
     // Read the data and build the graph
-    let (mut edgelist, n_nodes) = build_graph(path);
+    let (edgelist, n_nodes) = build_graph(path);
 
 
     //---------------------------------------------------------------------------
     // Edgelist is created from file and flow condition is checked.
+    // Next, flow decomposition algorithm.
     //---------------------------------------------------------------------------
 
+    // BUild a data structure containing all the cycles in the dbg
+    let cycles = build_cycles(edgelist.clone(), n_nodes);
 
-    let mut queue : VecDeque<NodeId> = VecDeque::new(); // 
-    let mut cycles : Vec<Vec<Edge>> = Vec::new();
+    
+    // Print the results
+    print_cycles(&cycles);
 
-    // Put all the nodes in the queue
-    for i in 0..n_nodes {
-        queue.push_back(i);
-    }
 
-    // Flow decomposition
-    while !queue.is_empty() {
-        // Going through all nodes as long as there are edges left on the graph
-        let node : NodeId = queue.pop_front().unwrap();
-        if edgelist[node].is_empty() {
-            continue;
-        }
+    //---------------------------------------------------------------------------
+    // Flow decomposition is done and the cycles are gathered.
+    // Next, two-pointer algorithm.
+    //---------------------------------------------------------------------------
 
-        // Setting up for the loop
-        let keys: Vec<_> = edgelist[node].keys().collect();
-        let mut min_flow = edgelist[node][keys[0]].weight;
-        let mut visited : HashSet<NodeId> = HashSet::new();
-        let mut counter = 0;
-        let mut new_node : NodeId = node;
-        let mut flow = Vec::new();
-        flow.push(min_flow);
-        let mut one_cycle : Vec<Edge> = Vec::new();
+    println!("************************************************************");
 
-        // Find a cycle from the dbg and the flow of that cycle
-        'single_flow: loop {
-            // Collect all the edges of the chosen node
-            let keys: Vec<_> = edgelist[new_node].keys().collect();
+    let mut safe_paths = Vec::new();
 
-            // Find a valid edge
-            while visited.contains(&edgelist[new_node][keys[counter]].end_node) && &edgelist[new_node][keys[counter]].end_node != &node {
-                counter+=1;
-
-                // Backtrack if there are no valid edge left
-                if counter == keys.len() {
-                    counter = 0;
-                    let edge = one_cycle.pop().unwrap();
-                    new_node = edge.start_node;
-                    flow.pop();
-                    continue 'single_flow;
-                }
-            }
-            let edge = &edgelist[new_node][keys[counter]];
-            one_cycle.push(edge.clone());
-
-            // Take next node
-            new_node = edge.end_node;
-            visited.insert(new_node);
-
-            // Calculate the flow of the cycle
-            min_flow = min(flow[flow.len()-1], edge.weight);
-            flow.push(min_flow);
-
-            // End the loop once a cycle is complete
-            if new_node == node {
-                break;
-            } 
-            counter = 0;
-        }
-
-        // Collect the newly found cycle
-        cycles.push(one_cycle.clone());
-
-        // Substract the cycle from the graph
-        min_flow = flow[flow.len()-1];
-        for edge in one_cycle {
-            if let Some(edge) = edgelist[edge.start_node].get_mut(&edge.id) {
-                edge.weight -= min_flow;
-            }
-            if edgelist[edge.start_node][&edge.id].weight == 0 {
-                edgelist[edge.start_node].remove(&edge.id);
-            }
-        }
-
-        // Add node back to queue, so that it is handled as long as it has edges
-        queue.push_back(node);
-    }
-
-    // Print the result
-    println!("\n##### Next, the cycles: #####");
-    let mut counter = 0;
+    // Perform the algorithm on each cycle
     for cycle in cycles {
-        println!("Cycle: {}", counter);
-        counter += 1;
-        for edge in cycle {
-            println!("Edge {} from {} to {} with weight {} and sequence {}.", edge.id, edge.start_node, edge.end_node, edge.weight, edge.string);
+        if cycle.len() == 1 {
+            // safe_paths.push(vec![cycle[0].clone()]);
+            safe_paths.push(cycle[0].string.clone());
+        } else {
+            for i in 0..cycle.len() {
+                safe_paths.push(longest_subwalk(&cycle, i, &edgelist));
+                // break;
+            }
         }
+        // break;
     }
 
-
+    println!("\n+++++ Then, the safe paths: +++++");
+    let mut counter = 0;
+    for sequence in safe_paths {
+        println!("Path {}:", counter);
+        counter += 1;
+        println!("{}", sequence);
+        // for sequence in path {
+            // println!("{}", edge.last_char());
+            // println!("{}", sequence);
+        // }
+    }
 }
+
 
