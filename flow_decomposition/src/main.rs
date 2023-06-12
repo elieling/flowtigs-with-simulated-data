@@ -1,3 +1,4 @@
+use std::env::args;
 // // use std::fs;
 // use std::cmp::min;
 // use std::collections::HashSet;
@@ -8,76 +9,21 @@ use crate::edge::Edge;
 // use crate::edge::build_edge;
 // use crate::edge::NodeId;
 // use crate::edge::EdgeId;
-use crate::edge::Weight;
+// use crate::edge::Weight;
 mod graph;
 use crate::graph::build_graph;
-use crate::graph::Edgelist;
+// use crate::graph::Edgelist;
 mod flow;
 use crate::flow::build_cycles;
 use crate::flow::print_cycles;
+mod cycle;
+use crate::cycle::longest_subwalk;
 
 
-// FUNCTION FOR SINGLE SAFE WALK
-// 
 
-// Function to get the next edge in the cycle. 
-// Returns the edge and its index in the cycle.
-fn next_edge(cycle: &Vec<Edge>, index: usize) -> (Edge, usize) {
-    let limit = cycle.len() - 1;
-    if index == limit {
-        return (cycle[0].clone(), 0);
-    }
-    return (cycle[index+1].clone(), index+1);
-}
 
-// Function to test the safety when adding an edge to the path. 
-// Returns whether it is safe and the remaining weight.  
-fn step (cycle: &Vec<Edge>, index: usize, weight: Weight, edgelist: &Edgelist) -> (bool, Weight) {
-    // println!("STEP");
-    let edge = cycle[index].clone();
-    // let start_node = edge.start_node;
-    let id = edge.id;
-    // let (_, next_id) = next_edge(cycle, index);
-    let neighbors = &edgelist[edge.start_node];
-    let mut weight = weight;
-    // println!("Edge: {}", edge.string);
 
-    let mut neighbor_weight = 0;
-    for (_, neigh) in neighbors {
-        // println!("neighbor {}, neigh_id {}, id {}", neigh.string, neigh.id, id);
-        if neigh.id != id {
-            neighbor_weight += neigh.weight;
-            // println!("neigh_weight: {}", neighbor_weight);
-        }
-    }
 
-    weight -= neighbor_weight;
-    let mut safety = false;
-    if weight > 0 {safety = true};
-    (safety, weight)
-}
-
-// Function that calculates the longest subwalk starting from a particular edge.
-// Returns a String of the longest path starting from the node.
-fn longest_subwalk(cycle: &Vec<Edge>, index: usize, edgelist: &Edgelist) -> String {
-    let mut longest_path = String::from("");
-    let mut index = index;
-    let original_edge = &cycle[index];
-    longest_path += &original_edge.string;
-    let mut weight_left = original_edge.weight;
-    loop {
-        let (edge, next_index) = next_edge(&cycle, index);
-        index = next_index;
-        let (safety, weight) = step(&cycle, index, weight_left, &edgelist); 
-        // println!("weight: {}", weight);
-        if safety {
-            longest_path.push(edge.last_char());
-            weight_left = weight;
-            if edge.id == original_edge.id {break;}
-        } else {break;}
-    }
-    longest_path
-}
 
 
 
@@ -92,7 +38,11 @@ fn main() {
     // let path = "../data/fake.edgelist";
 
     // Test files
-    let path = "../data/test_data/short.edgelist";
+    // let path = "../data/test_data/short.edgelist";
+
+    // args
+    let args: Vec<String> = args().collect();
+    let path = &args[1];  // cargo run -- '../data/long_k27.edgelist'
     // -------------------------------------------------------------- 
 
     // Read the data and build the graph
@@ -124,15 +74,22 @@ fn main() {
     // Perform the algorithm on each cycle
     for cycle in cycles {
         if cycle.len() == 1 {
-            // safe_paths.push(vec![cycle[0].clone()]);
             safe_paths.push(cycle[0].string.clone());
         } else {
+            let mut i2 = 0;
+            let mut sequence = String::from("");
+            let mut weight_left = 0;
             for i in 0..cycle.len() {
-                safe_paths.push(longest_subwalk(&cycle, i, &edgelist));
-                // break;
+                let seq;
+                if sequence.len() == 0 {seq = String::from("");}
+                else {seq = sequence[1..].to_string();}
+                let (walk, weight, index2) = longest_subwalk(&cycle, i, i2, weight_left, seq, &edgelist);
+                sequence = walk.clone();
+                safe_paths.push(walk);
+                weight_left = weight;
+                i2 = index2;
             }
         }
-        // break;
     }
 
     println!("\n+++++ Then, the safe paths: +++++");
@@ -141,11 +98,10 @@ fn main() {
         println!("Path {}:", counter);
         counter += 1;
         println!("{}", sequence);
-        // for sequence in path {
-            // println!("{}", edge.last_char());
-            // println!("{}", sequence);
-        // }
     }
 }
 
 
+// FIND OUT HOW TO IMPLEMENT SECOND POINTER.
+// IMPLEMENT SO THAT SUBPATHS ARE NOT OUTPUT IN ADDITION TO LONGEST PATHS.
+// MAYBE ADD A FUNCTION THAT UTILISES INFO LEFT FROM longest_subwalk().
