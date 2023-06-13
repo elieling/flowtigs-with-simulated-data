@@ -18,6 +18,12 @@ use crate::flow::build_cycles;
 use crate::flow::print_cycles;
 mod cycle;
 use crate::cycle::longest_subwalk;
+// use crate::cycle::ac_trie;
+// use crate::cycle::try_removing;
+mod ac_trie;
+use crate::ac_trie::Trie;
+use crate::ac_trie::build_trie;
+use crate::ac_trie::insert_trie;
 
 
 
@@ -79,14 +85,21 @@ fn main() {
             let mut i2 = 0;
             let mut sequence = String::from("");
             let mut weight_left = 0;
+            let mut former_weight = 0;
+            // let mut first 
             for i in 0..cycle.len() {
                 let seq;
-                if sequence.len() == 0 {seq = String::from("");}
+                if sequence.len() == 0 {
+                    seq = String::from("");
+                    weight_left = 0;
+                    // former_weight = 0;
+                }
                 else {seq = sequence[1..].to_string();}
-                let (walk, weight, index2) = longest_subwalk(&cycle, i, i2, weight_left, seq, &edgelist);
+                let (walk, weight, index2, former_w) = longest_subwalk(&cycle, i, i2, weight_left, former_weight, seq, &edgelist);
                 sequence = walk.clone();
                 safe_paths.push(walk);
                 weight_left = weight;
+                former_weight = former_w;
                 i2 = index2;
             }
         }
@@ -94,14 +107,32 @@ fn main() {
 
     println!("\n+++++ Then, the safe paths: +++++");
     let mut counter = 0;
-    for sequence in safe_paths {
+    for sequence in &safe_paths {
         println!("Path {}:", counter);
         counter += 1;
         println!("{}", sequence);
     }
+
+    // let filtered = ac_trie(&safe_paths);
+    // // try_removing();
+    // println!("\n+++++ Then, the safe paths after ac trie: +++++");
+    // let mut counter = 0;
+    // for sequence in filtered {
+    //     println!("Path {}:", counter);
+    //     counter += 1;
+    //     println!("{}", sequence);
+    // }
+
+
+    let mut trie = build_trie();
+    
+    for sequence in &safe_paths {
+        trie = insert_trie(trie, sequence.clone());
+        println!("Sequence {}", sequence);
+        println!("Length of trie is {}", &trie.nodes.len());
+        println!("--------------------------------");
+    }
+    trie.print_trie();
+
 }
-
-
-// FIND OUT HOW TO IMPLEMENT SECOND POINTER.
-// IMPLEMENT SO THAT SUBPATHS ARE NOT OUTPUT IN ADDITION TO LONGEST PATHS.
-// MAYBE ADD A FUNCTION THAT UTILISES INFO LEFT FROM longest_subwalk().
+    // FIX AHOCORASIK FUNCTION TO FIND SUFFIXES.

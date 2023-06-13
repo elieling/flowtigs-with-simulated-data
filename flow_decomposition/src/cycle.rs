@@ -5,6 +5,13 @@ use crate::graph::Edgelist;
 
 
 
+
+
+
+    
+
+
+
 // Function to get the next edge in the cycle. 
 // Returns the edge and its index in the cycle.
 fn next_edge(cycle: &Vec<Edge>, index: usize) -> (Edge, usize) {
@@ -37,50 +44,30 @@ fn step (cycle: &Vec<Edge>, index: usize, weight: Weight, edgelist: &Edgelist) -
 }
 
 
-// fn longest_subwalk(cycle: &Vec<Edge>, index: usize, edgelist: &Edgelist) -> (String, Weight) {
-//     let mut longest_path = String::from("");
-//     let mut index = index;
-//     let original_edge = &cycle[index];
-//     longest_path += &original_edge.string;
-//     let mut weight_left = original_edge.weight;
-//     loop {
-//         let (edge, next_index) = next_edge(&cycle, index);
-//         index = next_index;
-//         let (safety, weight) = step(&cycle, index, weight_left, &edgelist); 
-//         // println!("weight: {}", weight);
-//         if safety {
-//             longest_path.push(edge.last_char());
-//             weight_left = weight;
-//             if edge.id == original_edge.id {break;}
-//         } else {break;}
-//     }
-//     (longest_path, weight_left)
-// }
 
 // Function that calculates the longest subwalk starting from a particular edge.
 // Returns a String of the longest path starting from the node.
-pub fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: Weight, sequence: String, edgelist: &Edgelist) -> (String, Weight, EdgeId) {
-    let mut longest_path = sequence; //String::from(""); String::from("");
+pub fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: Weight, former_weight: Weight, sequence: String, edgelist: &Edgelist) -> (String, Weight, EdgeId, Weight) {
+    let mut longest_path = sequence; 
     let index1 = index1;
     let mut index2 = index2;
     let original_edge = &cycle[index1];
-    let mut weight_left = weight + original_edge.weight;
+    let mut weight_left = weight + original_edge.weight - former_weight;
     if longest_path.len() == 0 {
         longest_path += &original_edge.string;
         weight_left = original_edge.weight;
     }
     loop {
         let (edge, next_index) = next_edge(&cycle, index2);
-        // println!("Edge {} with char {}", edge.string, edge.first_char());
         println!("Sequence {} with weight {} and indexes {} {}", longest_path, weight_left, index1, index2);
         index2 = next_index;
         let (safety, weight) = step(&cycle, index2, weight_left, &edgelist); 
-        // println!("weight: {}", weight);
         if safety {
             longest_path.push(edge.last_char());
             weight_left = weight;
             if edge.id == original_edge.id {break;}
         } else {break;}
     }
-    (longest_path, weight_left, index2)
+    (longest_path, weight_left, index2, original_edge.weight)
 }
+
