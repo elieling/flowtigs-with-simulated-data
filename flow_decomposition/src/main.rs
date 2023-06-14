@@ -9,10 +9,10 @@ use crate::edge::Edge;
 // use crate::edge::build_edge;
 // use crate::edge::NodeId;
 // use crate::edge::EdgeId;
-// use crate::edge::Weight;
+use crate::edge::Weight;
 mod graph;
 use crate::graph::build_graph;
-// use crate::graph::Edgelist;
+use crate::graph::Edgelist;
 mod flow;
 use crate::flow::build_cycles;
 use crate::flow::print_cycles;
@@ -21,13 +21,32 @@ use crate::cycle::longest_subwalk;
 // use crate::cycle::ac_trie;
 // use crate::cycle::try_removing;
 mod ac_trie;
-use crate::ac_trie::Trie;
+// use crate::ac_trie::Trie;
 use crate::ac_trie::build_trie;
 use crate::ac_trie::insert_trie;
+use crate::ac_trie::find_leaves;
 
 
 
 
+fn find_longest_subwalk(sequence: String, mut weight_left: Weight, former_weight: Weight, mut neighbor_weights: Vec<Weight>, mut safe_paths: Vec<String>, i:usize, i2:usize, edgelist: &Edgelist, cycle: &Vec<Edge>) 
+-> (String, Weight, Weight, Vec<Weight>, Vec<String>, usize, bool) {
+    println!("Sequence {}", sequence);
+    let seq;
+    if sequence.len() == 0 {
+        seq = String::from("");
+        weight_left = 0;
+        // former_weight = 0;
+    }
+    else {seq = sequence[1..].to_string();}
+    let (walk, weight, index2, former_w, neighbor_weights, safety) = longest_subwalk(&cycle, i, i2, weight_left, former_weight, neighbor_weights, seq, &edgelist);
+    // sequence = walk.clone();
+    safe_paths.push(walk.clone());
+    // weight_left = weight;
+    // former_weight = former_w;
+    // i2 = index2;
+    (walk, weight, former_w, neighbor_weights, safe_paths, index2, safety)
+}
 
 
 
@@ -45,6 +64,8 @@ fn main() {
 
     // Test files
     // let path = "../data/test_data/short.edgelist";
+    // let path = "../data/test_data/sufpref.edgelist";
+    // let path = "../data/test_data/outflow.edgelist";
 
     // args
     let args: Vec<String> = args().collect();
@@ -86,22 +107,29 @@ fn main() {
             let mut sequence = String::from("");
             let mut weight_left = 0;
             let mut former_weight = 0;
+            let mut safety = true;
+            let mut neighbor_weights = Vec::new();
             // let mut first 
-            for i in 0..cycle.len() {
-                let seq;
-                if sequence.len() == 0 {
-                    seq = String::from("");
-                    weight_left = 0;
-                    // former_weight = 0;
-                }
-                else {seq = sequence[1..].to_string();}
-                let (walk, weight, index2, former_w) = longest_subwalk(&cycle, i, i2, weight_left, former_weight, seq, &edgelist);
-                sequence = walk.clone();
-                safe_paths.push(walk);
-                weight_left = weight;
-                former_weight = former_w;
-                i2 = index2;
+            for i in 0..(cycle.len()) {
+                neighbor_weights.push(0);
             }
+            for i in 0..(cycle.len()) {
+                // neighbor_weights.push(0);
+                // if !safety { //  && (i < i2) || i2 < i - 1
+                //     println!("Not safe, destroying {}", sequence);
+                //     sequence = String::from("");
+                //     weight_left = 0;
+                //     former_weight = 0;
+                //     safety = true;
+                //     // let former_index;
+                //     // if (i2 == 0) {i2 = cycle.len() - 1;}
+                //     // else {i2 -= 1;}
+                //     // continue;
+                // }
+                // else {}
+                (sequence, weight_left, former_weight, neighbor_weights, safe_paths, i2, safety) = find_longest_subwalk(sequence, weight_left, former_weight, neighbor_weights, safe_paths, i, i2, &edgelist, &cycle);
+            
+            } // &mut 
         }
     }
 
@@ -113,15 +141,9 @@ fn main() {
         println!("{}", sequence);
     }
 
-    // let filtered = ac_trie(&safe_paths);
-    // // try_removing();
-    // println!("\n+++++ Then, the safe paths after ac trie: +++++");
-    // let mut counter = 0;
-    // for sequence in filtered {
-    //     println!("Path {}:", counter);
-    //     counter += 1;
-    //     println!("{}", sequence);
-    // }
+   
+   
+    return();
 
 
     let mut trie = build_trie();
@@ -134,5 +156,16 @@ fn main() {
     }
     trie.print_trie();
 
+    let leaves = find_leaves(trie);
+
+    println!("###########################################");
+    println!("The leaves are:");
+    for leaf in leaves {
+        println!("{}", leaf);
+    }
+
+
 }
-    // FIX AHOCORASIK FUNCTION TO FIND SUFFIXES.
+   
+
+// cargo run -- '../data/test_data/outflow.edgelist'
