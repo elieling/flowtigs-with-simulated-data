@@ -16,11 +16,6 @@ pub struct Edge {
     pub ending: String,
 }
 
-impl Edge {
-    pub fn last_char(&self) -> char {
-        self.string.chars().last().unwrap()
-    }
-}
 
 // Function to build an Edge
 pub fn build_edge(id: EdgeId, start_node: NodeId, end_node: NodeId, weight: Weight, string: String, ending: String) -> Edge {

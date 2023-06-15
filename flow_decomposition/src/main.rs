@@ -1,9 +1,9 @@
 use std::env::args;
 // // use std::fs;
 // use std::cmp::min;
-// use std::collections::HashSet;
+use std::collections::HashSet;
 // // use std::collections::HashMap;
-// use std::collections::VecDeque;
+use std::collections::VecDeque;
 mod edge;
 use crate::edge::Edge;
 // use crate::edge::build_edge;
@@ -21,43 +21,56 @@ use crate::cycle::longest_subwalk;
 use crate::cycle::get_former_index;
 // use crate::cycle::ac_trie;
 // use crate::cycle::try_removing;
-mod ac_trie;
-// use crate::ac_trie::Trie;
-use crate::ac_trie::build_trie;
-use crate::ac_trie::insert_trie;
-use crate::ac_trie::find_leaves;
 
 
 
+fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize) -> HashSet<String> {
+    let mut safe_paths = HashSet::new();
+    for mut sequence in safe_edge_paths {
+        let first_edge = sequence.pop_front();
+        let mut string_path = first_edge.unwrap().string;
+        for edge in sequence {
+            string_path += &edge.string[..k-1];
+        }
+        safe_paths.insert(string_path);
+    }
+    safe_paths
+}
 
-fn find_longest_subwalk(mut sequence: &String, mut weight_left: &Weight, mut former_weight: &Weight, 
-    mut neighbor_weights: &mut Vec<Weight>, mut safe_paths: &mut Vec<String>, i:usize, i2:usize, 
-    edgelist: &Edgelist, cycle: &Vec<Edge>) 
--> (usize, bool) {
-    // println!("Sequence {}", sequence);
-    // println!("cycle index {} {} sequence {} same {}", i, i2, &cycle[i].string, &cycle[get_former_index(i, &cycle)].string == &sequence);
+
+// Function that finds the longest safe path in a cycle starting from a certain node
+fn find_longest_subwalk(sequence: &String, mut one_cycle: &mut VecDeque<Edge>, mut weight_left: &Weight, 
+    former_weight: Weight, neighbor_weights: &mut Vec<Weight>, 
+    safe_paths: &mut Vec<String>, mut safe_edge_paths: &mut Vec<VecDeque<Edge>>, i:usize, i2:usize, 
+    edgelist: &Edgelist, cycle: &Vec<Edge>) -> (usize, Weight) {
+
+        // ??????????????????
+    // If there are no edges in our current path, reinitialize the variables
+    if one_cycle.len() == 0 {
+        weight_left = &0;
+    }
+
     let seq;
     if sequence.len() == 0 {
         seq = String::from("");
-        weight_left = &0;
-        // former_weight = 0;
-    }
-    else {
-        // println!("--- SEQUENCE {}", sequence);
+        // weight_left = &0;
+    } else {
         let range: usize = cycle[get_former_index(i, &cycle)].ending.len().clone();
         seq = sequence[range..].to_string();
-        // println!("+++++ SEQ should start only similar {}", seq);
     }
-    // println!("&cycle[i].ending.len() {}", &cycle[i].ending.len());
-    // else {seq = sequence[1..].to_string();}
-    let (walk, index2, safety) = longest_subwalk(&cycle, i, i2, weight_left, former_weight, 
-        neighbor_weights, seq, &edgelist);
-    // sequence = walk.clone();
+
+    // Our first pointer has moved, so we have to remove the first element of our path
+    if !one_cycle.is_empty() {
+        one_cycle.pop_front();
+    }
+
+    // Finding the longest path in our cycle starting with index i
+    let (walk, index2, former_weight) = longest_subwalk(&cycle, i, i2, weight_left, former_weight, 
+        neighbor_weights, seq, one_cycle, &edgelist);
+
     safe_paths.push(walk);
-    // weight_left = weight;
-    // former_weight = former_w;
-    // i2 = index2;
-    (index2, safety)
+    safe_edge_paths.push(one_cycle.clone());
+    (index2, former_weight)
 }
 
 
@@ -111,45 +124,47 @@ fn main() {
     println!("************************************************************");
 
     let mut safe_paths = Vec::new();
+    let mut safe_edge_paths = Vec::new();
 
     // Perform the algorithm on each cycle
     for cycle in cycles {
+
+        // Initializing the vector for calculating paths in one cycle
+        let mut one_cycle: VecDeque<Edge> = VecDeque::new();
+
+        // If the cycle has only one edge, then the longest path in that cycle is that edge.
         if cycle.len() == 1 {
             safe_paths.push(cycle[0].string.clone());
+            one_cycle.push_back(cycle[0].clone());
+            safe_edge_paths.push(one_cycle);
         } else {
-            let mut i2 = 0;
+            // Setting up variables for a new cycle
+            let mut i2 = 0; // Index of the second pointer
             let mut sequence = String::from("");
-            let mut weight_left = 0;
-            let mut former_weight = 0;
-            let mut safety = true;
-            let mut neighbor_weights = Vec::new();
-            // let mut first 
-            for i in 0..(cycle.len()) {
+            let mut weight_left = 0; // The amount of flow left for the path to be safe
+            let mut former_weight = 0; // The weight of the first edge of the path is stored, to be able to move the first pointer
+            // let mut safety = true; // The variable is true as long as the path is safe
+            let mut neighbor_weights = Vec::new(); // Vector containing the flow leaving outside of the cycle for eachnode in the cycle
+            
+            // Initializing the neighbor_weights-vector so that all the indexes can be accessed
+            for _ in 0..(cycle.len()) {
                 neighbor_weights.push(0);
             }
+
+            // Calculating the safe paths for this cycle
             for i in 0..(cycle.len()) {
-                // neighbor_weights.push(0);
-                // if !safety { //  && (i < i2) || i2 < i - 1
-                //     println!("Not safe, destroying {}", sequence);
-                //     sequence = String::from("");
-                //     weight_left = 0;
-                //     former_weight = 0;
-                //     safety = true;
-                //     // let former_index;
-                //     // if (i2 == 0) {i2 = cycle.len() - 1;}
-                //     // else {i2 -= 1;}
-                //     // continue;
-                // }
-                // else {}
-                (i2, safety) = 
-                    find_longest_subwalk(&mut sequence, &mut weight_left, &mut former_weight, 
-                        &mut neighbor_weights, &mut safe_paths, i, i2, &edgelist, &cycle);
+                (i2, former_weight) = find_longest_subwalk(&mut sequence, &mut one_cycle, &mut weight_left, 
+                    former_weight, &mut neighbor_weights, &mut safe_paths, &mut safe_edge_paths, 
+                    i, i2, &edgelist, &cycle);
             
-            } // &mut 
+            } 
         }
+
+        // safe_edge_paths.push(one_cycle);
+
     }
 
-    println!("\n+++++ Then, the safe paths: +++++");
+    println!("\n+++++ Then, the safe paths as sequences: +++++");
     let mut counter = 0;
     for sequence in &safe_paths {
         println!("Path {}:", counter);
@@ -158,30 +173,32 @@ fn main() {
     }
 
    
-   
-    return();
+    println!("\n++++++++ Then, the safe paths as edges: ++++++++");
+    let mut counter = 0;
+    for sequence in &safe_edge_paths {
+        println!("Path {}:", counter);
+        for edge in sequence {
+            print!("{} ", edge.string);
+        }
+        println!("");
+        counter += 1;
+    }
 
 
-    let mut trie = build_trie();
-    
+    let safe_paths = unique_sequences(safe_edge_paths, k);
+
+    println!("\n++++++++ Then, the safe paths as final unique strings: ++++++++");
+    let mut counter = 0;
     for sequence in &safe_paths {
-        trie = insert_trie(trie, sequence.clone());
-        println!("Sequence {}", sequence);
-        println!("Length of trie is {}", &trie.nodes.len());
-        println!("--------------------------------");
-    }
-    trie.print_trie();
-
-    let leaves = find_leaves(trie);
-
-    println!("###########################################");
-    println!("The leaves are:");
-    for leaf in leaves {
-        println!("{}", leaf);
+        println!("Path {}:", counter);
+        println!("{} ", sequence);
+        counter += 1;
     }
 
-
+   
 }
+
+// Check maximality, then remove old sequence stuff
    
 
 // cargo run -- '../data/test_data/outflow.edgelist'

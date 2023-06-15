@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use crate::Edge;
 use crate::edge::EdgeId;
 use crate::edge::Weight;
@@ -52,7 +53,7 @@ fn step (cycle: &Vec<Edge>, index: usize, weight: Weight, mut neighbor_weights: 
     neighbor_weights[index] = neighbor_weight;
     let mut safety = false;
     if weight > 0 {safety = true;}
-    else {println!("FALSE!");}
+    // else {println!("FALSE!");}
     (safety, weight)
 }
 
@@ -75,66 +76,68 @@ fn check_neighbor_weight(cycle: &Vec<Edge>, index: usize, edgelist: &Edgelist) -
 // Function that calculates the longest subwalk starting from a particular edge.
 // Returns a String of the longest path starting from the node.
 pub fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, mut weight: &Weight, 
-    mut former_weight: &Weight, mut neighbor_weights: &mut Vec<Weight>, sequence: String, 
-    edgelist: &Edgelist)
- -> (String, EdgeId, bool) {
+    mut former_weight: Weight, mut neighbor_weights: &mut Vec<Weight>, sequence: String, 
+    mut one_cycle: &mut VecDeque<Edge>, edgelist: &Edgelist) -> (String, EdgeId, Weight) {
+
     let mut longest_path = sequence; 
-    let index1 = index1;
+    // let index1 = index1;
     let mut index2 = index2;
+
+    // We are storing the first edge of our path as well as the last possible potential edge
     let original_edge = &cycle[index1];
     let last_edge_of_cycle = &cycle[get_former_index(index1, &cycle)];
+
+    // The variable is true as long as the path is safe
     let mut safe = true;
+
+    // If the flow left is <= 0, the path is not safe
     let mut weight_left = weight + original_edge.weight - former_weight + neighbor_weights[index1].clone();
+    
+    // eeping trac of the weight of the first edge of the path
+    former_weight = cycle[index1].weight;
+
+    if one_cycle.len() == 0 {
+        one_cycle.push_back(original_edge.clone());
+        weight_left = original_edge.weight;
+    }
+
     if longest_path.len() == 0 {
         longest_path += &original_edge.string;
         weight_left = original_edge.weight;
     }
-    // println!("+++++ {} weight_left {} = weight {} + original_edge.weight {} - former_weight {}", &longest_path, weight_left, weight, original_edge.weight, former_weight);
-    // let index_of_next_edge;
-    // if index2 == cycle.len() - 1 {index_of_next_edge = 0;}
-    // else {index_of_next_edge = index2 + 1;}
-    // if weight_left <= check_neighbor_weight(&cycle, index2, &edgelist) {
-    //     println!("Not enough flow left: {} <= {}. Indices are {} and {}.", weight_left, check_neighbor_weight(&cycle, index2, &edgelist), index1, index2);
-    //     return (longest_path, weight_left, index2, original_edge.weight, neighbor_weights, false);
-    // }
-    // println!("Enough flow left: {}", weight_left);
+    
+    // Making the path longer as long as it is safe 
     loop {
-
-        // println!("Sequence {} with weight {} and indexes {} {}", longest_path, weight_left, index1, index2);
         let (edge, next_index) = next_edge(&cycle, index2);
         index2 = next_index;
-        // println!("Sequence {} with weight {} and indexes {} {}", longest_path, weight_left, index1, index2);
         let (safety, weight) = step(&cycle, index2, weight_left, neighbor_weights, &edgelist); 
-        // neighbor_weights = &neigh_weights;
-        // println!("Safety {} Weight {}", safety, weight);
         if safety {
-            // println!("- Sequence {} with ending {}", edge.string, edge.string[12..]);
-            // longest_path.push(edge.last_char());
-            println!("Longest_path {}", longest_path);
+            // println!("Longest_path {}", longest_path);
             longest_path += &edge.ending;
+            one_cycle.push_back(edge.clone());
             weight_left = weight;
-            // println!("get_next_index(edge.id {} , &cycle) {} == original_edge.id {}", edge.id, get_next_index(edge.id , &cycle), original_edge.id);
-            // if edge.id == &original_edge.id {
             if edge.id == last_edge_of_cycle.id {
-                println!("Got here!");
-                // index2 = get_former_index(get_former_index(index2, &cycle), &cycle);
+                // println!("Got here!");
                 break;
             }
         } else {
+            // Adjusting the indice for the the next round
             if index2 == index1 && longest_path.len() < 2 {
                 index2 = get_next_index(index2, &cycle);
             }
             else if index2 != get_next_index(index1, &cycle) {
                 index2 = get_former_index(index2, &cycle);
             }
-            safe = safety; break;
+            // safe = safety; 
+            break;
         }
-        // index2 = next_index;
     }
-    let original_weight = original_edge.weight.clone();
-    former_weight &original_weight;
-    (longest_path, index2, safe)
+
+    // let original_weight = original_edge.weight;
+    // former_weight = &original_weight;
+    (longest_path, index2, former_weight)
 }
+    
 
 
 // cargo run -- '../data/test_data/outflow.edgelist'
