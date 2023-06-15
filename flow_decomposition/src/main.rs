@@ -18,6 +18,7 @@ use crate::flow::build_cycles;
 use crate::flow::print_cycles;
 mod cycle;
 use crate::cycle::longest_subwalk;
+use crate::cycle::get_former_index;
 // use crate::cycle::ac_trie;
 // use crate::cycle::try_removing;
 mod ac_trie;
@@ -29,23 +30,34 @@ use crate::ac_trie::find_leaves;
 
 
 
-fn find_longest_subwalk(sequence: String, mut weight_left: Weight, former_weight: Weight, mut neighbor_weights: Vec<Weight>, mut safe_paths: Vec<String>, i:usize, i2:usize, edgelist: &Edgelist, cycle: &Vec<Edge>) 
--> (String, Weight, Weight, Vec<Weight>, Vec<String>, usize, bool) {
-    println!("Sequence {}", sequence);
+fn find_longest_subwalk(mut sequence: &String, mut weight_left: &Weight, mut former_weight: &Weight, 
+    mut neighbor_weights: &mut Vec<Weight>, mut safe_paths: &mut Vec<String>, i:usize, i2:usize, 
+    edgelist: &Edgelist, cycle: &Vec<Edge>) 
+-> (usize, bool) {
+    // println!("Sequence {}", sequence);
+    // println!("cycle index {} {} sequence {} same {}", i, i2, &cycle[i].string, &cycle[get_former_index(i, &cycle)].string == &sequence);
     let seq;
     if sequence.len() == 0 {
         seq = String::from("");
-        weight_left = 0;
+        weight_left = &0;
         // former_weight = 0;
     }
-    else {seq = sequence[1..].to_string();}
-    let (walk, weight, index2, former_w, neighbor_weights, safety) = longest_subwalk(&cycle, i, i2, weight_left, former_weight, neighbor_weights, seq, &edgelist);
+    else {
+        // println!("--- SEQUENCE {}", sequence);
+        let range: usize = cycle[get_former_index(i, &cycle)].ending.len().clone();
+        seq = sequence[range..].to_string();
+        // println!("+++++ SEQ should start only similar {}", seq);
+    }
+    // println!("&cycle[i].ending.len() {}", &cycle[i].ending.len());
+    // else {seq = sequence[1..].to_string();}
+    let (walk, index2, safety) = longest_subwalk(&cycle, i, i2, weight_left, former_weight, 
+        neighbor_weights, seq, &edgelist);
     // sequence = walk.clone();
-    safe_paths.push(walk.clone());
+    safe_paths.push(walk);
     // weight_left = weight;
     // former_weight = former_w;
     // i2 = index2;
-    (walk, weight, former_w, neighbor_weights, safe_paths, index2, safety)
+    (index2, safety)
 }
 
 
@@ -66,14 +78,16 @@ fn main() {
     // let path = "../data/test_data/short.edgelist";
     // let path = "../data/test_data/sufpref.edgelist";
     // let path = "../data/test_data/outflow.edgelist";
+    // let path = "../data/test_data/longer_k4.edgelist";
 
     // args
     let args: Vec<String> = args().collect();
     let path = &args[1];  // cargo run -- '../data/long_k27.edgelist'
+    let k : usize = args[2].to_string().parse::<usize>().unwrap();
     // -------------------------------------------------------------- 
 
     // Read the data and build the graph
-    let (edgelist, n_nodes) = build_graph(path);
+    let (edgelist, n_nodes) = build_graph(path, k);
 
 
     //---------------------------------------------------------------------------
@@ -127,7 +141,9 @@ fn main() {
                 //     // continue;
                 // }
                 // else {}
-                (sequence, weight_left, former_weight, neighbor_weights, safe_paths, i2, safety) = find_longest_subwalk(sequence, weight_left, former_weight, neighbor_weights, safe_paths, i, i2, &edgelist, &cycle);
+                (i2, safety) = 
+                    find_longest_subwalk(&mut sequence, &mut weight_left, &mut former_weight, 
+                        &mut neighbor_weights, &mut safe_paths, i, i2, &edgelist, &cycle);
             
             } // &mut 
         }

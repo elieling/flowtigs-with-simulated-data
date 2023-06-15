@@ -13,6 +13,7 @@ pub struct Edge {
     pub end_node: NodeId,
     pub weight: Weight,
     pub string: String,
+    pub ending: String,
 }
 
 impl Edge {
@@ -22,13 +23,14 @@ impl Edge {
 }
 
 // Function to build an Edge
-pub fn build_edge(id: EdgeId, start_node: NodeId, end_node: NodeId, weight: Weight, string: String) -> Edge {
+pub fn build_edge(id: EdgeId, start_node: NodeId, end_node: NodeId, weight: Weight, string: String, ending: String) -> Edge {
     Edge {
         id,
         start_node,
         end_node,
         weight,
         string,
+        ending,
     }
 }
 
