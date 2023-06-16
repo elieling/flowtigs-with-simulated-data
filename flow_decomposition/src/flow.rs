@@ -50,7 +50,8 @@ pub fn print_cycles(cycles: &Vec<Vec<Edge>>) {
 
 
 // BUild a data structure containing all the cycles in the dbg
-pub fn build_cycles(mut edgelist: Vec<HashMap<EdgeId, Edge>>, n_nodes: NodeId) -> Vec<Vec<Edge>> {
+pub fn build_cycles(mut edgelist: Edgelist, n_nodes: NodeId, original_edgelist: &Edgelist) 
+-> Vec<Vec<Edge>> {
     
     let mut cycles : Vec<Vec<Edge>> = Vec::new();
 
@@ -93,8 +94,9 @@ pub fn build_cycles(mut edgelist: Vec<HashMap<EdgeId, Edge>>, n_nodes: NodeId) -
                     continue 'single_flow;
                 }
             }
-            let edge = &edgelist[new_node][keys[counter]];
+            let edge = original_edgelist[new_node][keys[counter]].clone();
             one_cycle.push(edge.clone());
+            let edge = edgelist[new_node][keys[counter]].clone();
 
             // Take next node
             new_node = edge.end_node;

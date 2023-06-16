@@ -77,7 +77,7 @@ fn main() {
     //---------------------------------------------------------------------------
 
     // BUild a data structure containing all the cycles in the dbg
-    let cycles = build_cycles(edgelist.clone(), n_nodes);
+    let cycles = build_cycles(edgelist.clone(), n_nodes, &edgelist);
 
     
     // Print the results
@@ -91,7 +91,7 @@ fn main() {
 
     println!("************************************************************");
 
-    let mut safe_paths = Vec::new();
+    // let mut safe_paths = Vec::new();
     // The paths as edges
     let mut safe_edge_paths = Vec::new();
     // The extra weight left corresponding to each path
@@ -107,14 +107,14 @@ fn main() {
 
         // If the cycle has only one edge, then the longest path in that cycle is that edge.
         if cycle.len() == 1 {
-            safe_paths.push(cycle[0].string.clone());
+            // safe_paths.push(cycle[0].string.clone());
             one_cycle.push_back(cycle[0].clone());
             safe_edge_paths.push(one_cycle);
             extra_weight_of_paths.push(cycle[0].weight.clone());
         } else {
             // Setting up variables for a new cycle
             let mut i2 = 0; // Index of the second pointer
-            let mut sequence = String::from("");
+            // let mut sequence = String::from("");
             let mut weight_left = 0; // The amount of flow left for the path to be safe
             let mut former_weight = 0; // The weight of the first edge of the path is stored, to be able to move the first pointer
             // let mut safety = true; // The variable is true as long as the path is safe
@@ -129,8 +129,8 @@ fn main() {
 
             // Calculating the safe paths for this cycle
             for i in 0..(cycle.len()) {
-                (i2, former_weight) = find_longest_subwalk(&mut sequence, &mut one_cycle, &mut weight_left, 
-                    former_weight, &mut neighbor_weights, &mut safe_paths, &mut safe_edge_paths, 
+                (i2, weight_left, former_weight) = find_longest_subwalk(&mut one_cycle, weight_left, 
+                    former_weight, &mut neighbor_weights, &mut safe_edge_paths, 
                     i, i2, &cycle, &mut extra_weight_of_paths);
             
             } 
@@ -140,13 +140,13 @@ fn main() {
 
     }
 
-    println!("\n+++++ Then, the safe paths as sequences: +++++");
-    let mut counter = 0;
-    for sequence in &safe_paths {
-        println!("Path {}:", counter);
-        counter += 1;
-        println!("{}", sequence);
-    }
+    // println!("\n+++++ Then, the safe paths as sequences: +++++");
+    // let mut counter = 0;
+    // for sequence in &safe_paths {
+    //     println!("Path {}:", counter);
+    //     counter += 1;
+    //     println!("{}", sequence);
+    // }
 
    
     println!("\n++++++++ Then, the safe paths as edges: ++++++++");
@@ -157,7 +157,7 @@ fn main() {
             print!("{} ", edge.string);
         }
         println!("");
-        println!("Maximal? {}", is_maximal(sequence.clone(), edgelist.clone(), extra_weight_of_paths[counter]));
+        println!("Maximal? {}\n", is_maximal(&sequence, &edgelist, extra_weight_of_paths[counter]));
         counter += 1;
     }
 
@@ -178,7 +178,7 @@ fn main() {
     //     println!("{}", node);
     // }
 
-    let safe_paths = unique_sequences(safe_edge_paths, k);
+    let safe_paths = unique_sequences(safe_edge_paths, k, &extra_weight_of_paths, &edgelist);
 
     println!("\n++++++++ Then, the safe paths as final unique strings: ++++++++");
     let mut counter = 0;
@@ -191,7 +191,7 @@ fn main() {
    
 }
 
-// Check maximality, then remove old sequence stuff
+// Check maximality also in other direction. Test with more complicated graphs
    
 
 // cargo run -- '../data/test_data/outflow.edgelist'

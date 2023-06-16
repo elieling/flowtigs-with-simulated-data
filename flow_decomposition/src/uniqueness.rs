@@ -9,7 +9,7 @@ use std::cmp::max;
 
 
 // Check if the safe path is maximal
-pub fn is_maximal(path: VecDeque<Edge>, edgelist: Edgelist, weight_left: Weight) -> bool {
+pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weight) -> bool {
 
     // Right side
     let last_edge = path.get(path.len()-1).unwrap();
@@ -33,15 +33,21 @@ pub fn is_maximal(path: VecDeque<Edge>, edgelist: Edgelist, weight_left: Weight)
 
 
 
-pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize) -> HashSet<String> {
+pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights: &Vec<Weight>, 
+    edgelist: &Edgelist) -> HashSet<String> {
+
     let mut safe_paths = HashSet::new();
+    let  mut counter = 0;
     for mut sequence in safe_edge_paths {
-        let first_edge = sequence.pop_front();
-        let mut string_path = first_edge.unwrap().string;
-        for edge in sequence {
-            string_path += &edge.string[k-1..];
+        if is_maximal(&sequence, edgelist, weights[counter]) {
+            let first_edge = sequence.pop_front();
+            let mut string_path = first_edge.unwrap().string;
+            for edge in sequence {
+                string_path += &edge.string[k-1..];
+            }
+            safe_paths.insert(string_path);
         }
-        safe_paths.insert(string_path);
+        counter += 1;
     }
     safe_paths
 }
