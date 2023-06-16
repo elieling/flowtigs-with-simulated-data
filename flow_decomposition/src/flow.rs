@@ -3,8 +3,24 @@ use std::collections::HashMap;
 use crate::edge::Edge;
 use crate::edge::NodeId;
 use crate::edge::EdgeId;
+use crate::edge::Weight;
+use crate::graph::Edgelist;
 use std::cmp::min;
 use std::collections::VecDeque;
+
+
+pub fn initialize_weight_of_neighbors_from(edgelist: &Edgelist) -> Vec<Weight> {
+    let mut weights_of_neighbors = Vec::new();
+    for i in 0..edgelist.len() {
+        weights_of_neighbors.push(0);
+        for (_, edge) in &edgelist[i] {
+            weights_of_neighbors[i] += edge.weight;
+        }
+    }
+
+
+    weights_of_neighbors
+}
 
 
 // Put all the nodes in the queue

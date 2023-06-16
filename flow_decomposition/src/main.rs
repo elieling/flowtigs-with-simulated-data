@@ -1,7 +1,7 @@
 use std::env::args;
 // // use std::fs;
 // use std::cmp::min;
-use std::collections::HashSet;
+// use std::collections::HashSet;
 // // use std::collections::HashMap;
 use std::collections::VecDeque;
 mod edge;
@@ -9,69 +9,36 @@ use crate::edge::Edge;
 // use crate::edge::build_edge;
 // use crate::edge::NodeId;
 // use crate::edge::EdgeId;
-use crate::edge::Weight;
+// use crate::edge::Weight;
 mod graph;
 use crate::graph::build_graph;
-use crate::graph::Edgelist;
+// use crate::graph::Edgelist;
 mod flow;
 use crate::flow::build_cycles;
 use crate::flow::print_cycles;
+use crate::flow::initialize_weight_of_neighbors_from;
 mod cycle;
-use crate::cycle::longest_subwalk;
-use crate::cycle::get_former_index;
+use crate::cycle::find_longest_subwalk;
+mod uniqueness;
+use crate::uniqueness::is_maximal;
+use crate::uniqueness::unique_sequences;
+// use crate::cycle::longest_subwalk;
+// use crate::cycle::get_former_index;
 // use crate::cycle::ac_trie;
 // use crate::cycle::try_removing;
 
+// Logging
+// use log::{info, warn};
+// use simple_logger::SimpleLogger;
+// SimpleLogger::new().init().unwrap();
+// info!("Commencing yak shaving for {:?}", k);
+// warn!("Unable to locate a razor, retrying");
 
 
-fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize) -> HashSet<String> {
-    let mut safe_paths = HashSet::new();
-    for mut sequence in safe_edge_paths {
-        let first_edge = sequence.pop_front();
-        let mut string_path = first_edge.unwrap().string;
-        for edge in sequence {
-            string_path += &edge.string[..k-1];
-        }
-        safe_paths.insert(string_path);
-    }
-    safe_paths
-}
 
 
-// Function that finds the longest safe path in a cycle starting from a certain node
-fn find_longest_subwalk(sequence: &String, mut one_cycle: &mut VecDeque<Edge>, mut weight_left: &Weight, 
-    former_weight: Weight, neighbor_weights: &mut Vec<Weight>, 
-    safe_paths: &mut Vec<String>, mut safe_edge_paths: &mut Vec<VecDeque<Edge>>, i:usize, i2:usize, 
-    edgelist: &Edgelist, cycle: &Vec<Edge>) -> (usize, Weight) {
 
-        // ??????????????????
-    // If there are no edges in our current path, reinitialize the variables
-    if one_cycle.len() == 0 {
-        weight_left = &0;
-    }
 
-    let seq;
-    if sequence.len() == 0 {
-        seq = String::from("");
-        // weight_left = &0;
-    } else {
-        let range: usize = cycle[get_former_index(i, &cycle)].ending.len().clone();
-        seq = sequence[range..].to_string();
-    }
-
-    // Our first pointer has moved, so we have to remove the first element of our path
-    if !one_cycle.is_empty() {
-        one_cycle.pop_front();
-    }
-
-    // Finding the longest path in our cycle starting with index i
-    let (walk, index2, former_weight) = longest_subwalk(&cycle, i, i2, weight_left, former_weight, 
-        neighbor_weights, seq, one_cycle, &edgelist);
-
-    safe_paths.push(walk);
-    safe_edge_paths.push(one_cycle.clone());
-    (index2, former_weight)
-}
 
 
 
@@ -102,6 +69,7 @@ fn main() {
     // Read the data and build the graph
     let (edgelist, n_nodes) = build_graph(path, k);
 
+    
 
     //---------------------------------------------------------------------------
     // Edgelist is created from file and flow condition is checked.
@@ -124,7 +92,12 @@ fn main() {
     println!("************************************************************");
 
     let mut safe_paths = Vec::new();
+    // The paths as edges
     let mut safe_edge_paths = Vec::new();
+    // The extra weight left corresponding to each path
+    let mut extra_weight_of_paths = Vec::new();
+    // The weight of neighbors of each node for edges leaving from that node
+    let weight_of_neighbors_of_each_node = initialize_weight_of_neighbors_from(&edgelist);
 
     // Perform the algorithm on each cycle
     for cycle in cycles {
@@ -137,6 +110,7 @@ fn main() {
             safe_paths.push(cycle[0].string.clone());
             one_cycle.push_back(cycle[0].clone());
             safe_edge_paths.push(one_cycle);
+            extra_weight_of_paths.push(cycle[0].weight.clone());
         } else {
             // Setting up variables for a new cycle
             let mut i2 = 0; // Index of the second pointer
@@ -146,16 +120,18 @@ fn main() {
             // let mut safety = true; // The variable is true as long as the path is safe
             let mut neighbor_weights = Vec::new(); // Vector containing the flow leaving outside of the cycle for eachnode in the cycle
             
-            // Initializing the neighbor_weights-vector so that all the indexes can be accessed
-            for _ in 0..(cycle.len()) {
-                neighbor_weights.push(0);
+            // Initializing the neighbor_weights-vector 
+            for i in 0..(cycle.len()) {
+                let edge = &cycle[i];
+                let weight_from_same_node = weight_of_neighbors_of_each_node[edge.start_node];
+                neighbor_weights.push(weight_from_same_node - edge.weight);
             }
 
             // Calculating the safe paths for this cycle
             for i in 0..(cycle.len()) {
                 (i2, former_weight) = find_longest_subwalk(&mut sequence, &mut one_cycle, &mut weight_left, 
                     former_weight, &mut neighbor_weights, &mut safe_paths, &mut safe_edge_paths, 
-                    i, i2, &edgelist, &cycle);
+                    i, i2, &cycle, &mut extra_weight_of_paths);
             
             } 
         }
@@ -181,9 +157,26 @@ fn main() {
             print!("{} ", edge.string);
         }
         println!("");
+        println!("Maximal? {}", is_maximal(sequence.clone(), edgelist.clone(), extra_weight_of_paths[counter]));
         counter += 1;
     }
 
+    
+    // println!("\nwwwww Then, the weights: wwwww");
+    // let mut counter = 0;
+    // for extra in &extra_weight_of_paths {
+    //     println!("Weight: {}:", counter);
+    //     counter += 1;
+    //     println!("{}", extra);
+    // }
+
+    // println!("\nwwwww Then, the weights of neighbors: wwwww");
+    // let mut counter = 0;
+    // for node in &weight_of_neighbors_of_each_node {
+    //     println!("Weight: {}:", counter);
+    //     counter += 1;
+    //     println!("{}", node);
+    // }
 
     let safe_paths = unique_sequences(safe_edge_paths, k);
 
