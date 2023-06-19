@@ -22,6 +22,7 @@ use crate::cycle::find_longest_subwalk;
 mod uniqueness;
 use crate::uniqueness::is_maximal;
 use crate::uniqueness::unique_sequences;
+use crate::uniqueness::create_parent_structure;
 // use crate::cycle::longest_subwalk;
 // use crate::cycle::get_former_index;
 // use crate::cycle::ac_trie;
@@ -58,6 +59,7 @@ fn main() {
     // let path = "../data/test_data/short.edgelist";
     // let path = "../data/test_data/sufpref.edgelist";
     // let path = "../data/test_data/outflow.edgelist";
+    // let path = "../data/test_data/outflow_k2.edgelist";
     // let path = "../data/test_data/longer_k4.edgelist";
 
     // args
@@ -140,6 +142,8 @@ fn main() {
 
     }
 
+    let parents = create_parent_structure(&edgelist);
+
     // println!("\n+++++ Then, the safe paths as sequences: +++++");
     // let mut counter = 0;
     // for sequence in &safe_paths {
@@ -157,7 +161,7 @@ fn main() {
             print!("{} ", edge.string);
         }
         println!("");
-        println!("Maximal? {}\n", is_maximal(&sequence, &edgelist, extra_weight_of_paths[counter]));
+        println!("Maximal? {}\n", is_maximal(&sequence, &edgelist, extra_weight_of_paths[counter], &parents, &weight_of_neighbors_of_each_node));
         counter += 1;
     }
 
@@ -178,7 +182,7 @@ fn main() {
     //     println!("{}", node);
     // }
 
-    let safe_paths = unique_sequences(safe_edge_paths, k, &extra_weight_of_paths, &edgelist);
+    let safe_paths = unique_sequences(safe_edge_paths, k, &extra_weight_of_paths, &edgelist, weight_of_neighbors_of_each_node);
 
     println!("\n++++++++ Then, the safe paths as final unique strings: ++++++++");
     let mut counter = 0;
@@ -192,6 +196,6 @@ fn main() {
 }
 
 // Check maximality also in other direction. Test with more complicated graphs
-   
+// Function for Parent structure exist, then use it for maximality in other direction
 
 // cargo run -- '../data/test_data/outflow.edgelist'

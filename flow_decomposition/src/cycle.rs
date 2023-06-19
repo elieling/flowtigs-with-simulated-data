@@ -39,7 +39,7 @@ fn step (index: usize, weight: Weight, neighbor_weights: &mut Vec<Weight>)
     let mut weight = weight;
 
     weight -= neighbor_weights[index];  
-    println!("weight {} -= neighbor_weights[index] {};  ", weight, neighbor_weights[index]);
+    // println!("weight {} -= neighbor_weights[index] {};  ", weight, neighbor_weights[index]);
     let mut safety = false;
     if weight > 0 {safety = true;}
     (safety, weight)
@@ -66,7 +66,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
 
     // If the flow left is <= 0, the path is not safe
     let mut weight_left = weight + original_edge.weight - former_weight + neighbor_weights[index1].clone();
-    println!("weight_left {} = weight {} + original_edge.weight {} - former_weight {} + neighbor_weights[index1].clone() {}", weight_left, weight, original_edge.weight, former_weight, neighbor_weights[index1]);
+    // println!("weight_left {} = weight {} + original_edge.weight {} - former_weight {} + neighbor_weights[index1].clone() {}", weight_left, weight, original_edge.weight, former_weight, neighbor_weights[index1]);
 
     // Keeping track of the weight of the first edge of the path
     former_weight = cycle[index1].weight;
