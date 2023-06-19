@@ -5,6 +5,7 @@ use crate::edge::build_edge;
 use crate::edge::NodeId;
 use crate::edge::EdgeId;
 use crate::edge::Weight;
+// use log::error;
 
 
 pub type Edgelist = Vec<HashMap<EdgeId, Edge>>;
