@@ -11,3 +11,5 @@ fs = '0.0.5'
 aho-corasick = '0.7'
 log = '0.4.19'
 simple_logger = '2.0.0'
+clap = { version = "4.2.5", features = ["derive"] }
+simplelog = "0.12.1"

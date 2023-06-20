@@ -36,17 +36,17 @@ fn build_queue(n_nodes: NodeId) -> VecDeque<NodeId> {
 
 
 // Print the results
-pub fn print_cycles(cycles: &Vec<Vec<Edge>>) {
-    println!("\n##### Next, the cycles: #####");
-    let mut counter = 0;
-    for cycle in cycles {
-        println!("Cycle: {}", counter);
-        counter += 1;
-        for edge in cycle {
-            println!("Edge {} from {} to {} with weight {} and sequence {}.", edge.id, edge.start_node, edge.end_node, edge.weight, edge.string);
-        }
-    }
-}
+// pub fn print_cycles(cycles: &Vec<Vec<Edge>>) {
+//     println!("\n##### Next, the cycles: #####");
+//     let mut counter = 0;
+//     for cycle in cycles {
+//         println!("Cycle: {}", counter);
+//         counter += 1;
+//         for edge in cycle {
+//             println!("Edge {} from {} to {} with weight {} and sequence {}.", edge.id, edge.start_node, edge.end_node, edge.weight, edge.string);
+//         }
+//     }
+// }
 
 
 // BUild a data structure containing all the cycles in the dbg

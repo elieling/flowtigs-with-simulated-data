@@ -1,61 +1,8 @@
-Flow condition satisfied
-+++++++++++++++++++++++++++++++++++++++++++++++++
-Edge 0 from 0 to 1 with weight 23 and sequence A.
-Edge 1 from 0 to 1 with weight 1 and sequence C.
-Edge 2 from 1 to 0 with weight 23 and sequence G.
-Edge 3 from 1 to 0 with weight 1 and sequence T.
-+++++++++++++++++++++++++++++++++++++++++++++++++
-
-##### Next, the cycles: #####
-Cycle: 0
-Edge 0 from 0 to 1 with weight 23 and sequence A.
-Edge 2 from 1 to 0 with weight 23 and sequence G.
-Cycle: 1
-Edge 3 from 1 to 0 with weight 1 and sequence T.
-Edge 1 from 0 to 1 with weight 1 and sequence C.
-************************************************************
-Sequence A with weight 23 and indexes 0 0
-Sequence AG with weight 22 and indexes 0 1
-Sequence GA with weight 21 and indexes 1 0
-Sequence T with weight 1 and indexes 0 0
-Sequence C with weight 1 and indexes 1 1
-
-+++++ Then, the safe paths: +++++
 Path 0:
-AGA
+CGTACG 
 Path 1:
-GAG
+ACGCCCGTTTTTTACG 
 Path 2:
-T
+CGTTTTTTACGCCCGT 
 Path 3:
-C
-Length of trie is 1
-Sequence AGA
-Length of trie is 4
---------------------------------
-Length of trie is 4
-Sequence GAG
-Length of trie is 7
---------------------------------
-Length of trie is 7
-Sequence T
-Length of trie is 8
---------------------------------
-Length of trie is 8
-Sequence C
-Length of trie is 9
---------------------------------
-Node A
-Node T
-Node G
-Node C
-Node AG
-Node GA
-Node AGA
-Node GAG
-###########################################
-The leaves are:
-T
-C
-AGA
-GAG
+ACGT 

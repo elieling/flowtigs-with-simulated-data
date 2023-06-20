@@ -5,7 +5,6 @@ use crate::edge::build_edge;
 use crate::edge::NodeId;
 use crate::edge::EdgeId;
 use crate::edge::Weight;
-// use log::error;
 
 
 pub type Edgelist = Vec<HashMap<EdgeId, Edge>>;
@@ -59,7 +58,6 @@ fn flow_condition(indeg: Vec<Weight>, outdeg: Vec<Weight>) {
     for i in 0..indeg.len() {
         assert_eq!(indeg[i], outdeg[i], "Flow condition not satisfied");
     }
-    println!("Flow condition satisfied")
 }
 
 
@@ -86,14 +84,6 @@ pub fn build_graph(path: &str, k: usize) -> (Vec<HashMap<EdgeId, Edge>>, NodeId)
     // Check whether the flow condition holds. If not, produces an error 
     flow_condition(indeg, outdeg);
    
-    // Printing all edges
-    println!("+++++++++++++++++++++++++++++++++++++++++++++++++");
-    for node in &edgelist {
-        for (_, edge) in node {
-            println!("Edge {} from {} to {} with weight {} and sequence {}.", edge.id, edge.start_node, edge.end_node, edge.weight, edge.string);
-        }
-    }
-    println!("+++++++++++++++++++++++++++++++++++++++++++++++++");
     (edgelist, n_nodes)
 }
 

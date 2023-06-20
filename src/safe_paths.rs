@@ -1,18 +1,12 @@
-// use std::env::args;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 use crate::edge::Edge;
 use crate::graph::build_graph;
 use crate::flow::build_cycles;
-use crate::flow::print_cycles;
 use crate::flow::initialize_weight_of_neighbors_from;
 use crate::cycle::find_longest_subwalk;
-// use crate::uniqueness::is_maximal;
 use crate::uniqueness::unique_sequences;
-// use crate::uniqueness::create_parent_structure;
 use log::info;
-// use simple_logger::SimpleLogger;
-
 
 
 pub fn safe_paths(path: &str, k: usize) -> HashSet<String> {
@@ -38,15 +32,13 @@ pub fn safe_paths(path: &str, k: usize) -> HashSet<String> {
 
     
     // Print the results
-    print_cycles(&cycles);
+    // print_cycles(&cycles);
 
 
     //---------------------------------------------------------------------------
     // Flow decomposition is done and the cycles are gathered.
     // Next, two-pointer algorithm.
     //---------------------------------------------------------------------------
-
-    println!("************************************************************");
 
     // The paths as edges
     let mut safe_edge_paths = Vec::new();
@@ -92,27 +84,6 @@ pub fn safe_paths(path: &str, k: usize) -> HashSet<String> {
     }
 
     info!("Safe paths calculated successfully.");
-
-
-
-    // let parents = create_parent_structure(&edgelist);
-
-   
-    // println!("\n++++++++ Then, the safe paths as edges: ++++++++");
-    // let mut counter = 0;
-    // for sequence in &safe_edge_paths {
-    //     println!("Path {}:", counter);
-    //     for edge in sequence {
-    //         print!("{} ", edge.string);
-    //     }
-    //     println!("");
-    //     println!("Maximal? {}\n", is_maximal(&sequence, &edgelist, extra_weight_of_paths[counter], &parents, &weight_of_neighbors_of_each_node));
-    //     counter += 1;
-    // }
-
-
-    // info!("Only here for testing purposes.");
-    
 
 
     let safe_paths = unique_sequences(safe_edge_paths, k, &extra_weight_of_paths, &edgelist, weight_of_neighbors_of_each_node);
