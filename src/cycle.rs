@@ -59,7 +59,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
 
     // We are storing the first edge of our path as well as the last possible potential edge
     let original_edge = &cycle[index1];
-    let last_edge_of_cycle = cycle[get_former_index(index1, &cycle)];
+    let last_edge_of_cycle = &cycle[get_former_index(index1, cycle)];
     let mut extra_weight = original_edge.weight;
 
 
@@ -114,13 +114,13 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
 
 // Function that finds the longest safe path in a cycle starting from a certain node
 pub fn find_longest_subwalk(one_cycle: &mut VecDeque<Edge>, mut weight_left: Weight, 
-    former_weight: Weight, neighbor_weights: &mut Vec<Weight>, safe_edge_paths: &mut Vec<VecDeque<Edge>>, 
+    former_weight: Weight, neighbor_weights: &mut [Weight], safe_edge_paths: &mut Vec<VecDeque<Edge>>, 
     i:usize, i2:usize, cycle: &Vec<Edge>, extra_weight_of_paths: &mut Vec<Weight>) 
     -> (usize, Weight, Weight) {
 
 
     // If there are no edges in our current path, reinitialize the variables
-    if one_cycle.len() == 0 {
+    if one_cycle.is_empty() {
         weight_left = 0;
     }
 
@@ -139,12 +139,12 @@ pub fn find_longest_subwalk(one_cycle: &mut VecDeque<Edge>, mut weight_left: Wei
 
 
     // Finding the longest path in our cycle starting with index i
-    let (index2, weight_left, former_weight, extra_weight) = longest_subwalk(&cycle, i, i2, weight_left, 
+    let (index2, weight_left, former_weight, extra_weight) = longest_subwalk(cycle, i, i2, weight_left, 
         former_weight, neighbor_weights, one_cycle);
 
     // safe_paths.push(walk);
     safe_edge_paths.push(one_cycle.clone());
-    extra_weight_of_paths.push(extra_weight.clone());
+    extra_weight_of_paths.push(extra_weight);
     (index2, weight_left, former_weight)
 }
     

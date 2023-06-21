@@ -17,7 +17,7 @@ pub fn create_parent_structure(edgelist: &Edgelist) -> Vec<Vec<Edge>> {
     }
     // let mut counter = 0;
     for node in edgelist {
-        for (_, edge) in node {
+        for edge in node.values() {
             parents[edge.end_node].push(edge.clone());
         }
         // counter += 1;
@@ -28,16 +28,17 @@ pub fn create_parent_structure(edgelist: &Edgelist) -> Vec<Vec<Edge>> {
 
 
 // Check if the safe path is maximal
-pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weight, parents: &Vec<Vec<Edge>>, weights_of_neighbors: &Vec<Weight>) -> bool {
+pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weight, parents: &[Vec<Edge>], 
+    weights_of_neighbors: &[Weight]) -> bool {
 
-    let last_edge = path.get(path.len()-1).unwrap();
+    let last_edge = path.back().unwrap();
     let first_edge = path.get(0).unwrap();
 
     // Right side
     let last_node = last_edge.end_node;
     let mut maximum_weight_of_a_neighbor = 0;
     let mut total_weight_of_neighbors = 0;
-    for (_, child) in &edgelist[last_node] {
+    for child in edgelist[last_node].values() {
         total_weight_of_neighbors += child.weight;
         if child.id == first_edge.id {continue;}
         maximum_weight_of_a_neighbor = max(maximum_weight_of_a_neighbor, child.weight);
@@ -69,7 +70,7 @@ pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weigh
 
 
 
-pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights: &Vec<Weight>, 
+pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights: &[Weight], 
     edgelist: &Edgelist, weights_of_neighbors: Vec<Weight>) -> HashSet<String> {
 
     let parents = create_parent_structure(edgelist);

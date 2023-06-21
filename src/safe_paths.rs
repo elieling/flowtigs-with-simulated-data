@@ -58,7 +58,7 @@ pub fn safe_paths(path: &str, k: usize) -> HashSet<String> {
             // safe_paths.push(cycle[0].string.clone());
             one_cycle.push_back(cycle[0].clone());
             safe_edge_paths.push(one_cycle);
-            extra_weight_of_paths.push(cycle[0].weight.clone());
+            extra_weight_of_paths.push(cycle[0].weight);
         } else {
             // Setting up variables for a new cycle
             let mut i2 = 0; // Index of the second pointer
@@ -67,8 +67,7 @@ pub fn safe_paths(path: &str, k: usize) -> HashSet<String> {
             let mut neighbor_weights = Vec::new(); // Vector containing the flow leaving outside of the cycle for eachnode in the cycle
             
             // Initializing the neighbor_weights-vector 
-            for i in 0..(cycle.len()) {
-                let edge = &cycle[i];
+            for edge in &cycle {
                 let weight_from_same_node = weight_of_neighbors_of_each_node[edge.start_node];
                 neighbor_weights.push(weight_from_same_node - edge.weight);
             }

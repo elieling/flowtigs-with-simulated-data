@@ -1,8 +1,8 @@
-Path 0:
-CGTACTCG 
-Path 1:
+>Path_0
 CGAC 
-Path 2:
-ACG 
-Path 3:
+>Path_1
 ACTCGTAC 
+>Path_2
+CGTACTCG 
+>Path_3
+ACG 
