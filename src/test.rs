@@ -13,7 +13,7 @@ mod tests {
         result.sort();
 
 
-        // assert_eq!(result.len(), 4);
+        assert_eq!(result.len(), 4);
         assert_eq!(result[0], "ACGCCCGTTTTTTACG");
         assert_eq!(result[1], "ACGT");
         assert_eq!(result[2], "CGTACG");
@@ -77,5 +77,13 @@ mod tests {
         assert_eq!(result[1], "ACTCGTAC");
         assert_eq!(result[2], "CGAC");
         assert_eq!(result[3], "CGTACTCG");
+    }
+
+
+
+    #[test]
+    fn should_fail() {
+        let _ = safe_paths("data/fake.edgelist", 10);
+        assert_eq!(1, 1);
     }
 }

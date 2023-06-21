@@ -13,9 +13,8 @@ pub type Edgelist = Vec<HashMap<EdgeId, Edge>>;
 // Reading the file
 fn read_file(path: &str) -> String {
     // println!("Using file {}", path);
-    let contents = fs::read_to_string(path)
-        .expect("Should have been able to read the file");
-    contents
+    fs::read_to_string(path)
+        .expect("Should have been able to read the file")
 }
 
 
@@ -34,7 +33,7 @@ fn create_graph(values: Vec<&str>, n_nodes : NodeId, k: usize) -> (Vec<HashMap<E
     let mut outdeg = vec![0; n_nodes];
 
     // Create the graph
-    let rounds = (&values).len() / 4;
+    let rounds = (values).len() / 4;
     let mut id : EdgeId = 0;
     for i in 0..rounds {
         let node1: NodeId = values[i*4+1].parse().unwrap();
@@ -42,12 +41,12 @@ fn create_graph(values: Vec<&str>, n_nodes : NodeId, k: usize) -> (Vec<HashMap<E
         let nodeweight: Weight = values[i*4+3].parse().unwrap();
         let ending = &values[i*4+4][(k-1)..].to_string();
         let edge = build_edge(id, node1, node2, nodeweight, (&values[i*4+4]).to_string(), ending.clone());
-        edgelist[node1 as usize].insert(edge.id, edge);
+        edgelist[node1].insert(edge.id, edge);
         id += 1;
 
         // Counting indegree and outdegree for checking flow condition
-        indeg[node1 as usize] += nodeweight;
-        outdeg[node2 as usize] += nodeweight;
+        indeg[node1] += nodeweight;
+        outdeg[node2] += nodeweight;
     }
     (edgelist, indeg, outdeg)
 }

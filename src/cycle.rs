@@ -29,12 +29,12 @@ fn next_edge(cycle: &Vec<Edge>, index: usize) -> (Edge, usize) {
     if index == limit {
         return (cycle[0].clone(), 0);
     }
-    return (cycle[index+1].clone(), index+1);
+    (cycle[index+1].clone(), index+1)
 }
 
 // Function to test the safety when adding an edge to the path. 
 // Returns whether it is safe and the remaining weight.  
-fn step (index: usize, weight: Weight, neighbor_weights: &mut Vec<Weight>) 
+fn step (index: usize, weight: Weight, neighbor_weights: &mut [Weight]) 
 -> (bool, Weight) {
     let mut weight = weight;
 
@@ -51,7 +51,7 @@ fn step (index: usize, weight: Weight, neighbor_weights: &mut Vec<Weight>)
 // Function that calculates the longest subwalk starting from a particular edge.
 // Returns a String of the longest path starting from the node.
 fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: Weight, 
-    mut former_weight: Weight, neighbor_weights: &mut Vec<Weight>, one_cycle: &mut VecDeque<Edge>) 
+    mut former_weight: Weight, neighbor_weights: &mut [Weight], one_cycle: &mut VecDeque<Edge>) 
     -> (EdgeId, Weight, Weight, Weight) {
 
     // let mut longest_path = sequence; 
@@ -59,19 +59,19 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
 
     // We are storing the first edge of our path as well as the last possible potential edge
     let original_edge = &cycle[index1];
-    let last_edge_of_cycle = &cycle[get_former_index(index1, &cycle)];
+    let last_edge_of_cycle = cycle[get_former_index(index1, &cycle)];
     let mut extra_weight = original_edge.weight;
 
 
 
     // If the flow left is <= 0, the path is not safe
-    let mut weight_left = weight + original_edge.weight - former_weight + neighbor_weights[index1].clone();
+    let mut weight_left = weight + original_edge.weight - former_weight + neighbor_weights[index1];
     // println!("weight_left {} = weight {} + original_edge.weight {} - former_weight {} + neighbor_weights[index1].clone() {}", weight_left, weight, original_edge.weight, former_weight, neighbor_weights[index1]);
 
     // Keeping track of the weight of the first edge of the path
     former_weight = cycle[index1].weight;
 
-    if one_cycle.len() == 0 {
+    if one_cycle.is_empty() {
         one_cycle.push_back(original_edge.clone());
         weight_left = original_edge.weight;
     }
@@ -83,32 +83,28 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
     
     // Making the path longer as long as it is safe 
     loop {
-        let (edge, next_index) = next_edge(&cycle, index2);
+        let (edge, next_index) = next_edge(cycle, index2);
         index2 = next_index;
         let (safety, weight) = step(index2, weight_left, neighbor_weights); 
         if safety {
             // longest_path += &edge.ending;
             one_cycle.push_back(edge.clone());
             weight_left = weight;
-            extra_weight = weight_left.clone();
+            extra_weight = weight_left;
             if edge.id == last_edge_of_cycle.id {
                 break;
             }
         } else {
             // Adjusting the indice for the the next round
             if index2 == index1 && one_cycle.len() < 2 {
-                // println!("Index {} cycle.len {}", index1, one_cycle.len());
-                index2 = get_next_index(index2, &cycle);
+                index2 = get_next_index(index2, cycle);
             }
-            else if index2 != get_next_index(index1, &cycle) {
-                // println!("Index2 {} newxt of 1 {}", index2, get_next_index(index1, &cycle));
-                index2 = get_former_index(index2, &cycle);
+            else if index2 != get_next_index(index1, cycle) {
+                index2 = get_former_index(index2, cycle);
             }
-            // println!("BREAK {} {}", index1, index2);
             break;
         }
     }
-    // weight = weight_left.clone();
     (index2, weight_left, former_weight, extra_weight)
 }
 

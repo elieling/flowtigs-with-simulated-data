@@ -93,7 +93,7 @@ fn main() {
     for sequence in &safe_paths {
         println!("Path {}:", counter);
         println!("{} ", sequence);
-        writeln!(output, "Path {}:", counter).unwrap();
+        writeln!(output, ">Path_{}", counter).unwrap();
         writeln!(output, "{} ", sequence).unwrap();
         counter += 1;
     }

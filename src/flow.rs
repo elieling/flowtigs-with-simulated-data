@@ -13,7 +13,7 @@ pub fn initialize_weight_of_neighbors_from(edgelist: &Edgelist) -> Vec<Weight> {
     let mut weights_of_neighbors = Vec::new();
     for i in 0..edgelist.len() {
         weights_of_neighbors.push(0);
-        for (_, edge) in &edgelist[i] {
+        for edge in edgelist[i].values() {
             weights_of_neighbors[i] += edge.weight;
         }
     }
@@ -82,7 +82,7 @@ pub fn build_cycles(mut edgelist: Edgelist, n_nodes: NodeId, original_edgelist: 
             let keys: Vec<_> = edgelist[new_node].keys().collect();
 
             // Find a valid edge
-            while visited.contains(&edgelist[new_node][keys[counter]].end_node) && &edgelist[new_node][keys[counter]].end_node != &node {
+            while visited.contains(&edgelist[new_node][keys[counter]].end_node) && edgelist[new_node][keys[counter]].end_node != node {
                 counter+=1;
 
                 // Backtrack if there are no valid edge left
