@@ -88,11 +88,11 @@ fn main() {
     let safe_paths = safe_paths(&cli.input, cli.k);
 
 
-    println!("\n++++++++ Then, the safe paths as final unique strings: ++++++++");
+    // println!("\n++++++++ Then, the safe paths as final unique strings: ++++++++");
     let mut counter = 0;
     for sequence in &safe_paths {
-        println!("Path {}:", counter);
-        println!("{} ", sequence);
+        // println!("Path {}:", counter);
+        // println!("{} ", sequence);
         writeln!(output, ">Path_{}", counter).unwrap();
         writeln!(output, "{} ", sequence).unwrap();
         counter += 1;
