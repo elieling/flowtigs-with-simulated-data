@@ -9,6 +9,7 @@ use std::cmp::max;
 
 
 
+
 pub fn create_parent_structure(edgelist: &Edgelist) -> Vec<Vec<Edge>> {
     let mut parents = Vec::new();
     let empty_vector = Vec::new();
@@ -69,6 +70,37 @@ pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weigh
 }
 
 
+fn reverse_byte(byte: u8) -> u8 {
+    if byte == 65 {
+        return 84;
+    }
+    if byte == 67 {
+        return 71;
+    }
+    if byte == 71 {
+        return 67;
+    }
+    65
+}
+
+
+fn get_smaller_between_iself_and_reverse_complement(sequence: String) -> String {
+    let mut reverse_complement = String::from("");
+    let mut counter = sequence.len();
+    let byte_sequence = sequence.as_bytes();
+    for _ in 0..sequence.len() {
+        counter -= 1;
+        // println!("{}, {}, {}, {}", counter, i, byte_sequence[counter], reverse_byte(byte_sequence[counter]));
+        reverse_complement.push(reverse_byte(byte_sequence[counter]) as char);
+    }
+    // println!("{}", reverse_complement);
+    if sequence < reverse_complement {
+        return sequence;
+    }
+    reverse_complement
+}
+
+
 
 pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights: &[Weight], 
     edgelist: &Edgelist, weights_of_neighbors: Vec<Weight>) -> HashSet<String> {
@@ -83,9 +115,10 @@ pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights:
             for edge in sequence {
                 string_path += &edge.string[k-1..];
             }
-            safe_paths.insert(string_path);
+            safe_paths.insert(get_smaller_between_iself_and_reverse_complement(string_path));
         }
         counter += 1;
     }
+    // let a = get_smaller_between_iself_and_reverse_complement(String::from("ACACGGTT"));
     safe_paths
 }

@@ -15,9 +15,9 @@ mod tests {
 
         assert_eq!(result.len(), 4);
         assert_eq!(result[0], "ACGCCCGTTTTTTACG");
-        assert_eq!(result[1], "ACGT");
-        assert_eq!(result[2], "CGTACG");
-        assert_eq!(result[3], "CGTTTTTTACGCCCGT");
+        assert_eq!(result[1], "ACGGGCGTAAAAAACG");
+        assert_eq!(result[2], "ACGT");
+        assert_eq!(result[3], "CGTACG");
     }
 
 
@@ -32,12 +32,11 @@ mod tests {
         result.sort();
 
 
-        assert_eq!(result.len(), 5);
+        assert_eq!(result.len(), 4);
         assert_eq!(result[0], "AA");
         assert_eq!(result[1], "ACG");
         assert_eq!(result[2], "CC");
         assert_eq!(result[3], "GAC");
-        assert_eq!(result[4], "GG");
     }
 
 
@@ -76,7 +75,7 @@ mod tests {
         assert_eq!(result[0], "ACG");
         assert_eq!(result[1], "ACTCGTAC");
         assert_eq!(result[2], "CGAC");
-        assert_eq!(result[3], "CGTACTCG");
+        assert_eq!(result[3], "CGAGTACG");
     }
 
 
