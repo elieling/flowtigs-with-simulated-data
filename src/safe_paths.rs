@@ -30,6 +30,18 @@ pub fn safe_paths(path: &str, k: usize) -> HashSet<String> {
 
     info!("Cycles separated successfully.");
 
+    // Check whether the graph contains separated components that are cycles.
+    let limit: usize = 1;
+    'outside_loop: for cycle in &cycles {
+        for edge in cycle {
+            if &edgelist[edge.start_node].keys().len() > &limit {continue 'outside_loop;}
+        }
+        // If a separated component is a cycle, it should have length 1.
+        if cycle.len() > limit {info!("Found separated component of size {}", cycle.len())}
+    }
+
+    info!("Cycle components checked successfully.");
+
     
     // Print the results
     // print_cycles(&cycles);
