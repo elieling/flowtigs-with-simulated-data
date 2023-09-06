@@ -12,20 +12,18 @@ pub struct Edge {
     pub start_node: NodeId,
     pub end_node: NodeId,
     pub weight: Weight,
-    pub string: String,
-    pub ending: String,
+    // pub string: String,
 }
 
 
 // Function to build an Edge
-pub fn build_edge(id: EdgeId, start_node: NodeId, end_node: NodeId, weight: Weight, string: String, ending: String) -> Edge {
+pub fn build_edge(id: EdgeId, start_node: NodeId, end_node: NodeId, weight: Weight) -> Edge {
     Edge {
         id,
         start_node,
         end_node,
         weight,
-        string,
-        ending,
+        // string,
     }
 }
 

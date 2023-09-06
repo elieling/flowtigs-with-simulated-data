@@ -14,7 +14,8 @@ use clap::Parser;
 use std::io::Write;
 use std::io::BufWriter;
 use std::path::PathBuf;
-
+use crate::memory_meter::MemoryMeter;
+mod memory_meter;
 
 
 
@@ -56,6 +57,8 @@ pub fn initialise_logging(log_level: LevelFilter) {
 
 
 fn main() {
+    let mut meter = MemoryMeter::new();
+    info!("Memoery meter built successfully");
     // Choose the file you want to use
     // -------------------------------------------------------------- 
     // let path = "data/short_k13.edgelist";
@@ -84,8 +87,11 @@ fn main() {
         cli.input, cli.k, cli.output
     );
     let mut output = BufWriter::new(File::create(&cli.output).unwrap());
+    meter.report();
+    let safe_paths = safe_paths(&cli.input, cli.k, Some(&mut meter));
 
-    let safe_paths = safe_paths(&cli.input, cli.k);
+    info!("Safe paths calculated");
+    meter.report();
 
 
     // println!("\n++++++++ Then, the safe paths as final unique strings: ++++++++");
@@ -97,6 +103,8 @@ fn main() {
         writeln!(output, "{} ", sequence).unwrap();
         counter += 1;
     }
+    info!("Safe paths written to file");
+    meter.report();
 }
 
 

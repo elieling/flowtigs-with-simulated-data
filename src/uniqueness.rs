@@ -103,7 +103,7 @@ fn get_smaller_between_iself_and_reverse_complement(sequence: String) -> String 
 
 
 pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights: &[Weight], 
-    edgelist: &Edgelist, weights_of_neighbors: Vec<Weight>) -> HashSet<String> {
+    edgelist: &Edgelist, weights_of_neighbors: Vec<Weight>, string_sequences: Vec<String>) -> HashSet<String> {
 
     let parents = create_parent_structure(edgelist);
     let mut safe_paths = HashSet::new();
@@ -111,11 +111,11 @@ pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights:
     for mut sequence in safe_edge_paths {
         if is_maximal(&sequence, edgelist, weights[counter], &parents, &weights_of_neighbors) {
             let first_edge = sequence.pop_front();
-            let mut string_path = first_edge.unwrap().string;
+            let mut string_path = (&string_sequences[first_edge.unwrap().id]).to_string(); // first_edge.unwrap().string;
             for edge in sequence {
-                string_path += &edge.string[k-1..];
+                string_path += (&string_sequences[edge.id][k-1..]); // &edge.string[k-1..];
             }
-            safe_paths.insert(get_smaller_between_iself_and_reverse_complement(string_path));
+            safe_paths.insert(get_smaller_between_iself_and_reverse_complement((&string_path).to_string()));
         }
         counter += 1;
     }
