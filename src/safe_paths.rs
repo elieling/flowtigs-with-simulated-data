@@ -37,6 +37,14 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
         meter.report();
     }
 
+    // Count the number of edges in all cycles in total
+    let mut n_edges = 0;
+    for cycle in &cycles {
+        n_edges += cycle.len();
+    }
+
+    info!("Cycles contain a total of {} edges", n_edges);
+
     // Check whether the graph contains separated components that are cycles.
     let limit: usize = 1;
     'outside_loop: for cycle in &cycles {
