@@ -10,7 +10,7 @@ use std::cmp::max;
 
 
 
-pub fn create_parent_structure(edgelist: &Edgelist) -> Vec<Vec<Edge>> {
+pub fn create_parent_structure(edgelist: &Edgelist, all_edges: &Vec<Edge>) -> Vec<Vec<Edge>> {
     let mut parents = Vec::new();
     let empty_vector = Vec::new();
     for _ in 0..edgelist.len() {
@@ -18,8 +18,8 @@ pub fn create_parent_structure(edgelist: &Edgelist) -> Vec<Vec<Edge>> {
     }
     // let mut counter = 0;
     for node in edgelist {
-        for edge in node.values() {
-            parents[edge.end_node].push(edge.clone());
+        for edge in node {
+            parents[all_edges[*edge].end_node].push(all_edges[*edge].clone());
         }
         // counter += 1;
     }
@@ -30,7 +30,7 @@ pub fn create_parent_structure(edgelist: &Edgelist) -> Vec<Vec<Edge>> {
 
 // Check if the safe path is maximal
 pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weight, parents: &[Vec<Edge>], 
-    weights_of_neighbors: &[Weight]) -> bool {
+    weights_of_neighbors: &[Weight], all_edges: &Vec<Edge>) -> bool {
 
     let last_edge = path.back().unwrap();
     let first_edge = path.get(0).unwrap();
@@ -39,10 +39,10 @@ pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weigh
     let last_node = last_edge.end_node;
     let mut maximum_weight_of_a_neighbor = 0;
     let mut total_weight_of_neighbors = 0;
-    for child in edgelist[last_node].values() {
-        total_weight_of_neighbors += child.weight;
-        if child.id == first_edge.id {continue;}
-        maximum_weight_of_a_neighbor = max(maximum_weight_of_a_neighbor, child.weight);
+    for child in &edgelist[last_node] {
+        total_weight_of_neighbors += all_edges[*child].weight;
+        if child == &first_edge.id {continue;}
+        maximum_weight_of_a_neighbor = max(maximum_weight_of_a_neighbor, all_edges[*child].weight);
     }
     // println!("weight_left {} > total_weight_of_neighbors {} - maximum_weight_of_a_neighbor {}", weight_left, total_weight_of_neighbors, maximum_weight_of_a_neighbor);
     
@@ -103,17 +103,17 @@ fn get_smaller_between_iself_and_reverse_complement(sequence: String) -> String 
 
 
 pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights: &[Weight], 
-    edgelist: &Edgelist, weights_of_neighbors: Vec<Weight>, string_sequences: Vec<String>) -> HashSet<String> {
+    edgelist: &Edgelist, weights_of_neighbors: Vec<Weight>, string_sequences: Vec<String>, all_edges: &Vec<Edge>) -> HashSet<String> {
 
-    let parents = create_parent_structure(edgelist);
+    let parents = create_parent_structure(edgelist, all_edges);
     let mut safe_paths = HashSet::new();
     let  mut counter = 0;
     for mut sequence in safe_edge_paths {
-        if is_maximal(&sequence, edgelist, weights[counter], &parents, &weights_of_neighbors) {
+        if is_maximal(&sequence, edgelist, weights[counter], &parents, &weights_of_neighbors, all_edges) {
             let first_edge = sequence.pop_front();
             let mut string_path = (&string_sequences[first_edge.unwrap().id]).to_string(); // first_edge.unwrap().string;
             for edge in sequence {
-                string_path += (&string_sequences[edge.id][k-1..]); // &edge.string[k-1..];
+                string_path += &string_sequences[edge.id][k-1..]; // &edge.string[k-1..];
             }
             safe_paths.insert(get_smaller_between_iself_and_reverse_complement((&string_path).to_string()));
         }

@@ -16,7 +16,7 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
     
 
     // Read the data and build the graph
-    let (edgelist, n_nodes, string_sequences) = build_graph(path, k);
+    let (edgelist, n_nodes, string_sequences, all_edges) = build_graph(path);
 
     
 
@@ -30,7 +30,7 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
     //---------------------------------------------------------------------------
 
     // Build a data structure containing all the cycles in the dbg
-    let cycles = build_cycles(edgelist.clone(), n_nodes, &edgelist);
+    let cycles = build_cycles(edgelist.clone(), n_nodes, all_edges.clone(), &all_edges);
 
     info!("Cycles separated successfully.");
     if let Some(ref mut meter) = meter {
@@ -45,20 +45,20 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
 
     info!("Cycles contain a total of {} edges", n_edges);
 
-    // Check whether the graph contains separated components that are cycles.
-    let limit: usize = 1;
-    'outside_loop: for cycle in &cycles {
-        for edge in cycle {
-            if &edgelist[edge.start_node].keys().len() > &limit {continue 'outside_loop;}
-        }
-        // If a separated component is a cycle, it should have length 1.
-        if cycle.len() > limit {info!("Found separated component of size {}", cycle.len())}
-    }
+    // // Check whether the graph contains separated components that are cycles.
+    // let limit: usize = 1;
+    // 'outside_loop: for cycle in &cycles {
+    //     for edge in cycle {
+    //         if &edgelist[edge.start_node].keys().len() > &limit {continue 'outside_loop;}
+    //     }
+    //     // If a separated component is a cycle, it should have length 1.
+    //     if cycle.len() > limit {info!("Found separated component of size {}", cycle.len())}
+    // }
 
-    info!("Cycle components checked successfully.");
-    if let Some(ref mut meter) = meter {
-        meter.report();
-    }
+    // info!("Cycle components checked successfully.");
+    // if let Some(ref mut meter) = meter {
+    //     meter.report();
+    // }
 
     
     // Print the results
@@ -75,7 +75,7 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
     // The extra weight left corresponding to each path
     let mut extra_weight_of_paths = Vec::new();
     // The weight of neighbors of each node for edges leaving from that node
-    let weight_of_neighbors_of_each_node = initialize_weight_of_neighbors_from(&edgelist);
+    let weight_of_neighbors_of_each_node = initialize_weight_of_neighbors_from(&edgelist, &all_edges);
 
     // Perform the algorithm on each cycle
     for cycle in cycles {
@@ -118,7 +118,7 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
     }
 
 
-    let safe_paths = unique_sequences(safe_edge_paths, k, &extra_weight_of_paths, &edgelist, weight_of_neighbors_of_each_node, string_sequences);
+    let safe_paths = unique_sequences(safe_edge_paths, k, &extra_weight_of_paths, &edgelist, weight_of_neighbors_of_each_node, string_sequences, &all_edges);
 
 
     info!("Safe paths made to strings successfully.");

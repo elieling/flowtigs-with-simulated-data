@@ -9,12 +9,12 @@ use std::cmp::min;
 use std::collections::VecDeque;
 
 
-pub fn initialize_weight_of_neighbors_from(edgelist: &Edgelist) -> Vec<Weight> {
+pub fn initialize_weight_of_neighbors_from(edgelist: &Edgelist, all_edges: &Vec<Edge>) -> Vec<Weight> {
     let mut weights_of_neighbors = Vec::new();
     for i in 0..edgelist.len() {
         weights_of_neighbors.push(0);
-        for edge in edgelist[i].values() {
-            weights_of_neighbors[i] += edge.weight;
+        for edge in &edgelist[i] {
+            weights_of_neighbors[i] += all_edges[*edge].weight;
         }
     }
 
@@ -50,8 +50,14 @@ fn build_queue(n_nodes: NodeId) -> VecDeque<NodeId> {
 
 
 // BUild a data structure containing all the cycles in the dbg
-pub fn build_cycles(mut edgelist: Edgelist, n_nodes: NodeId, original_edgelist: &Edgelist) 
+pub fn build_cycles(mut edgelist: Edgelist, n_nodes: NodeId, mut all_edges: Vec<Edge>, all_edges_original: &Vec<Edge>) 
 -> Vec<Vec<Edge>> {
+
+    // // Initialize data structure for temporary weights
+    // let mut temp_weights : Vec<Weight> = vec::new();
+    // for edge in all_edges {
+    //     temp_weights.push(edge.weight);
+    // }
     
     let mut cycles : Vec<Vec<Edge>> = Vec::new();
 
@@ -67,8 +73,8 @@ pub fn build_cycles(mut edgelist: Edgelist, n_nodes: NodeId, original_edgelist: 
         }
 
         // Setting up for the loop
-        let keys: Vec<_> = edgelist[node].keys().collect();
-        let mut min_flow = edgelist[node][keys[0]].weight;
+        let keys: Vec<_> = edgelist[node].iter().collect();
+        let mut min_flow = all_edges[*keys[0]].weight;
         let mut visited : HashSet<NodeId> = HashSet::new();
         let mut counter = 0;
         let mut new_node : NodeId = node;
@@ -79,10 +85,10 @@ pub fn build_cycles(mut edgelist: Edgelist, n_nodes: NodeId, original_edgelist: 
         // Find a cycle from the dbg and the flow of that cycle
         'single_flow: loop {
             // Collect all the edges of the chosen node
-            let keys: Vec<_> = edgelist[new_node].keys().collect();
+            let keys: Vec<_> = edgelist[new_node].iter().collect();
 
             // Find a valid edge
-            while visited.contains(&edgelist[new_node][keys[counter]].end_node) && edgelist[new_node][keys[counter]].end_node != node {
+            while visited.contains(&all_edges[*keys[counter]].end_node) && &all_edges[*keys[counter]].end_node != &node {
                 counter+=1;
 
                 // Backtrack if there are no valid edge left
@@ -94,9 +100,9 @@ pub fn build_cycles(mut edgelist: Edgelist, n_nodes: NodeId, original_edgelist: 
                     continue 'single_flow;
                 }
             }
-            let edge = original_edgelist[new_node][keys[counter]].clone();
+            let edge = all_edges_original[*keys[counter]].clone();
             one_cycle.push(edge.clone());
-            let edge = edgelist[new_node][keys[counter]].clone();
+            let edge = all_edges[*keys[counter]].clone();
 
             // Take next node
             new_node = edge.end_node;
@@ -119,10 +125,11 @@ pub fn build_cycles(mut edgelist: Edgelist, n_nodes: NodeId, original_edgelist: 
         // Substract the cycle from the graph
         min_flow = flow[flow.len()-1];
         for edge in one_cycle {
-            if let Some(edge) = edgelist[edge.start_node].get_mut(&edge.id) {
+            if let Some(edge) = all_edges.get_mut(edge.id) {
                 edge.weight -= min_flow;
             }
-            if edgelist[edge.start_node][&edge.id].weight == 0 {
+            if all_edges[*&edge.id].weight == 0 {
+                all_edges.remove(edge.id);
                 edgelist[edge.start_node].remove(&edge.id);
             }
         }
