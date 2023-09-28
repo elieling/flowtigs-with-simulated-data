@@ -11,7 +11,7 @@ use log::{info, LevelFilter};
 use simplelog::{ColorChoice, CombinedLogger, Config, TermLogger, TerminalMode};
 mod test;
 use clap::Parser;
-use std::io::Write;
+// use std::io::Write;
 use std::io::BufWriter;
 use std::path::PathBuf;
 use crate::memory_meter::MemoryMeter;
@@ -86,25 +86,15 @@ fn main() {
         "Loading graph from {:?} with k = {} and writing to {:?}",
         cli.input, cli.k, cli.output
     );
-    let mut output = BufWriter::new(File::create(&cli.output).unwrap());
+    let output = BufWriter::new(File::create(&cli.output).unwrap());
     meter.report();
-    let safe_paths = safe_paths(&cli.input, cli.k, Some(&mut meter));
+    safe_paths(&cli.input, cli.k, Some(&mut meter), output);
 
-    info!("Safe paths calculated");
+    info!("The end");
     meter.report();
 
 
-    // println!("\n++++++++ Then, the safe paths as final unique strings: ++++++++");
-    let mut counter = 0;
-    for sequence in &safe_paths {
-        // println!("Path {}:", counter);
-        // println!("{} ", sequence);
-        writeln!(output, ">Path_{}", counter).unwrap();
-        writeln!(output, "{} ", sequence).unwrap();
-        counter += 1;
-    }
-    info!("Safe paths written to file");
-    meter.report();
+    
 }
 
 
