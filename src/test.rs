@@ -82,7 +82,7 @@ mod tests {
 
     #[test]
     fn should_fail() {
-        let _ = safe_paths("data/fake.edgelist", 10);
+        let _ = safe_paths("data/test_data/fake.edgelist", 10);
         assert_eq!(1, 1);
     }
 }
