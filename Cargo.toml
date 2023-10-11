@@ -2,6 +2,10 @@
 name = "flowtigs"
 version = "1.0.0"
 edition = "2021"
+description = "An algorithm for calculating flowtigs in a De Bruijn graph of DNA reads in metagenomes."
+repository = "https://github.com/elieling/safe-paths"
+license = "BSD-2-Clause"
+license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
