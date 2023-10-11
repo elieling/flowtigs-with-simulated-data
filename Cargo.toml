@@ -1,6 +1,6 @@
 [package]
 name = "flowtigs"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 description = "An algorithm for calculating flowtigs in a De Bruijn graph of DNA reads in metagenomes."
 repository = "https://github.com/elieling/flowtigs"
