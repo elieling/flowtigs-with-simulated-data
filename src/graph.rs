@@ -19,7 +19,7 @@ fn read_file(path: &str) -> String {
 
 
 // Creating data structure representing the graph and calculating indegree and outdegree of each node
-fn create_graph(values: Vec<&str>, n_nodes : NodeId, k: usize) -> (Vec<HashMap<EdgeId, Edge>>, Vec<Weight>, Vec<Weight>, Vec<String>) {
+fn create_graph(values: Vec<&str>, n_nodes : NodeId) -> (Vec<HashMap<EdgeId, Edge>>, Vec<Weight>, Vec<Weight>, Vec<String>) {
     
     // Setup empty data structure
     let mut edgelist: Vec<HashMap<EdgeId, Edge>> = Vec::new();
@@ -41,8 +41,7 @@ fn create_graph(values: Vec<&str>, n_nodes : NodeId, k: usize) -> (Vec<HashMap<E
         let node1: NodeId = values[i*4+1].parse().unwrap();
         let node2: NodeId = values[i*4+2].parse().unwrap();
         let nodeweight: Weight = values[i*4+3].parse().unwrap();
-        // let ending = &values[i*4+4][(k-1)..].to_string();
-        let edge = build_edge(id, node1, node2, nodeweight); //, (&values[i*4+4]).to_string());
+        let edge = build_edge(id, node1, node2, nodeweight); 
         string_sequences[id] = (&values[i*4+4]).to_string();
         edgelist[node1].insert(edge.id, edge);
         id += 1;
@@ -70,7 +69,7 @@ fn flow_condition(indeg: Vec<Weight>, outdeg: Vec<Weight>) {
 
 
 // Read the data and build the graph
-pub fn build_graph(path: &str, k: usize) -> (Vec<HashMap<EdgeId, Edge>>, NodeId, Vec<String>) {
+pub fn build_graph(path: &str) -> (Vec<HashMap<EdgeId, Edge>>, NodeId, Vec<String>) {
 
     // Reading the file
     let contents = read_file(path);
@@ -81,7 +80,7 @@ pub fn build_graph(path: &str, k: usize) -> (Vec<HashMap<EdgeId, Edge>>, NodeId,
     let n_nodes : NodeId = n_nodes.parse().unwrap();    
 
     // Creating data structure representing the graph 
-    let (edgelist, indeg, outdeg, string_sequences) = create_graph(values, n_nodes, k);
+    let (edgelist, indeg, outdeg, string_sequences) = create_graph(values, n_nodes);
 
     // Check whether the flow condition holds. If not, produces an error 
     flow_condition(indeg, outdeg);

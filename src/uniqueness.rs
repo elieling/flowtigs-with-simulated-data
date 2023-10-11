@@ -2,7 +2,6 @@
 use std::collections::HashSet;
 use crate::graph::Edgelist;
 use crate::edge::Edge;
-// use crate::edge::NodeId;
 use crate::edge::Weight;
 use std::collections::VecDeque;
 use std::cmp::max;
@@ -16,12 +15,10 @@ pub fn create_parent_structure(edgelist: &Edgelist) -> Vec<Vec<Edge>> {
     for _ in 0..edgelist.len() {
         parents.push(empty_vector.clone());
     }
-    // let mut counter = 0;
     for node in edgelist {
         for edge in node.values() {
             parents[edge.end_node].push(edge.clone());
         }
-        // counter += 1;
     }
     parents
 }
@@ -44,7 +41,6 @@ pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weigh
         if child.id == first_edge.id {continue;}
         maximum_weight_of_a_neighbor = max(maximum_weight_of_a_neighbor, child.weight);
     }
-    // println!("weight_left {} > total_weight_of_neighbors {} - maximum_weight_of_a_neighbor {}", weight_left, total_weight_of_neighbors, maximum_weight_of_a_neighbor);
     
     // Check if the flow is sufficient to get a longer path. If yes, return false.
     if weight_left > total_weight_of_neighbors - maximum_weight_of_a_neighbor {
@@ -59,7 +55,6 @@ pub fn is_maximal(path: &VecDeque<Edge>, edgelist: &Edgelist, weight_left: Weigh
             maximum_weight_of_parent_edge = max(maximum_weight_of_parent_edge, parent.weight);
         }
     }
-    // println!("weight_left {} + maximum_weight_of_parent_edge {} - weights_of_neighbors[first_node] {} > 0 {}", weight_left, maximum_weight_of_parent_edge, weights_of_neighbors[first_node], weight_left + maximum_weight_of_parent_edge - weights_of_neighbors[first_node]);
 
     // Check if the flow is sufficient to get a longer path. If yes, return false.
     if weight_left + maximum_weight_of_parent_edge - weights_of_neighbors[first_node] > 0 {
@@ -90,10 +85,9 @@ fn get_smaller_between_iself_and_reverse_complement(sequence: String) -> String 
     let byte_sequence = sequence.as_bytes();
     for _ in 0..sequence.len() {
         counter -= 1;
-        // println!("{}, {}, {}, {}", counter, i, byte_sequence[counter], reverse_byte(byte_sequence[counter]));
         reverse_complement.push(reverse_byte(byte_sequence[counter]) as char);
     }
-    // println!("{}", reverse_complement);
+
     if sequence < reverse_complement {
         return sequence;
     }
@@ -111,14 +105,14 @@ pub fn unique_sequences(safe_edge_paths: Vec<VecDeque<Edge>>, k: usize, weights:
     for mut sequence in safe_edge_paths {
         if is_maximal(&sequence, edgelist, weights[counter], &parents, &weights_of_neighbors) {
             let first_edge = sequence.pop_front();
-            let mut string_path = (&string_sequences[first_edge.unwrap().id]).to_string(); // first_edge.unwrap().string;
+            let mut string_path = (string_sequences[first_edge.unwrap().id]).to_string(); 
             for edge in sequence {
-                string_path += (&string_sequences[edge.id][k-1..]); // &edge.string[k-1..];
+                string_path += &string_sequences[edge.id][k-1..]; 
             }
-            safe_paths.insert(get_smaller_between_iself_and_reverse_complement((&string_path).to_string()));
+            safe_paths.insert(get_smaller_between_iself_and_reverse_complement((string_path).to_string()));
         }
         counter += 1;
     }
-    // let a = get_smaller_between_iself_and_reverse_complement(String::from("ACACGGTT"));
+    
     safe_paths
 }

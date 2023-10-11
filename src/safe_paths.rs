@@ -16,7 +16,7 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
     
 
     // Read the data and build the graph
-    let (edgelist, n_nodes, string_sequences) = build_graph(path, k);
+    let (edgelist, n_nodes, string_sequences) = build_graph(path);
 
     
 
@@ -49,7 +49,7 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
     let limit: usize = 1;
     'outside_loop: for cycle in &cycles {
         for edge in cycle {
-            if &edgelist[edge.start_node].keys().len() > &limit {continue 'outside_loop;}
+            if edgelist[edge.start_node].keys().len() > limit {continue 'outside_loop;}
         }
         // If a separated component is a cycle, it should have length 1.
         if cycle.len() > limit {info!("Found separated component of size {}", cycle.len())}
