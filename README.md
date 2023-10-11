@@ -20,7 +20,7 @@ The output of this algorithm is a FASTA file, which contains the safe maximal st
 
 The algorithm is ran with the following command, assuming that [Rust](https://rustup.rs/) is installed:
 
-cargo run --release -- -k {k} --input '{arc_centric_dbg}' --output '{safe_paths}' 2>&1 | tee -a '{log}'
+`cargo run --release -- -k {k} --input '{arc_centric_dbg}' --output '{safe_paths}' 2>&1 | tee -a '{log}'`
 
 where:
 - {k} is the size of the k-mers used in the De Bruijn graph.
@@ -30,4 +30,4 @@ where:
 
 The algorithm can also be ran without a log file with the following command:
 
-cargo run --release -- -k {k} --input '{arc_centric_dbg}' --output '{safe_paths}'
+`cargo run --release -- -k {k} --input '{arc_centric_dbg}' --output '{safe_paths}'`
