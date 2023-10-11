@@ -1,6 +1,6 @@
 # Flowtigs
 
-An algorithm for calculating safe paths with flowtigs from a De Bruijn graph of DNA or RNA reads in metagenomes.
+An algorithm for calculating flowtigs in a De Bruijn graph of DNA reads in metagenomes.
 
 ## Input
 
@@ -18,12 +18,11 @@ The output of this algorithm is a FASTA file, which contains the safe maximal st
 
 ## Running instructions
 
-The algorithm is ran with the following command:
+The algorithm is ran with the following command, assuming that [Rust](https://rustup.rs/) is installed:
 
-'{binary}' -k {k} --input '{arc_centric_dbg}' --output '{safe_paths}' 2>&1 | tee -a '{log}'
+cargo run --release -- -k {k} --input '{arc_centric_dbg}' --output '{safe_paths}' 2>&1 | tee -a '{log}'
 
 where:
-- {binary} is the compiled Rust program.
 - {k} is the size of the k-mers used in the De Bruijn graph.
 - {arc_centric_dbg} is the input edgelist.
 - {safe_paths} is the desired path to the output file.
@@ -31,4 +30,4 @@ where:
 
 The algorithm can also be ran without a log file with the following command:
 
-'{binary}' -k {k} --input '{arc_centric_dbg}' --output '{safe_paths}'
+cargo run --release -- -k {k} --input '{arc_centric_dbg}' --output '{safe_paths}'
