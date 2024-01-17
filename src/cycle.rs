@@ -103,7 +103,6 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
                         copied_cycle.push_back(element);
                     }
                 }
-                }
                 break;
             }
         } else {
