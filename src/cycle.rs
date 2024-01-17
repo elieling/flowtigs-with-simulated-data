@@ -99,7 +99,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
             if index2 == index1 && one_cycle.len() < 2 {
                 index2 = get_next_index(index2, cycle);
             }
-            else if index2 != get_next_index(index1, cycle) {
+            else if index2 != get_next_index(index1, cycle) && one_cycle.len() < &cycle.len() {
                 index2 = get_former_index(index2, cycle);
             }
             break;
