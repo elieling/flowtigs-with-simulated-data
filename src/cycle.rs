@@ -104,7 +104,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
                 if entire_rounds < 2 {break;}
                 more_than_one_round = true;
                 for _ in 0..1 { //entire_rounds {
-                    for _ in 0..copied_cycle.len() {
+                    for _ in 0..copied_cycle.len()+1 {
                         let element = copied_cycle.pop_front().unwrap();
                         long_cycle.push_back(element.clone());
                         copied_cycle.push_back(element);
