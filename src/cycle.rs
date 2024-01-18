@@ -95,7 +95,11 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
             //    break;
             //}
             if edge.id == index1 {
-                if former_weight == weight_left {break;}
+                if former_weight == weight_left {
+                    index2 = get_former_index(index2, cycle);
+                    one_cycle.pop_back();
+                    break;
+                }
             }
         } else {
             // Adjusting the indice for the the next round
