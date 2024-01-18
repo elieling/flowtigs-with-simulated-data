@@ -166,9 +166,9 @@ pub fn find_longest_subwalk(one_cycle: &mut VecDeque<Edge>, mut weight_left: Wei
         former_weight, neighbor_weights, one_cycle, edgelist, prohibited_cycle);
 
     // safe_paths.push(walk);
-    if !prohibited_cycle {
-        safe_edge_paths.push(one_cycle.clone());
-    }
+    //if !prohibited_cycle {
+    safe_edge_paths.push(one_cycle.clone());
+    //}
     extra_weight_of_paths.push(extra_weight);
     (index2, weight_left, former_weight)
 }
