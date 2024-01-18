@@ -96,8 +96,23 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
             //}
             if edge.id == index1 {
                 if former_weight == weight_left {
+                    let mut is_cycle = true;
+                    for edge in one_cycle.clone() {
+                        if neighbor_weights[edge.id] > 0 {
+                            is_cycle = false;
+                        }
+                    }
+                    assert!(is_cycle);
                     index2 = get_former_index(index2, cycle);
                     one_cycle.pop_back();
+                    let mut is_cycle = true;
+                    for edge in one_cycle.clone() {
+                        if neighbor_weights[edge.id] > 0 {
+                            is_cycle = false;
+                        }
+                    }
+                    assert!(is_cycle);
+                    assert!(weight_left == extra_weight);
                     break;
                 }
             }
@@ -112,6 +127,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
             break;
         }
     }
+    assert!(weight_left == extra_weight);
     (index2, weight_left, former_weight, extra_weight)
 }
 
