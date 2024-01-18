@@ -93,7 +93,12 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
             weight_left = weight;
             extra_weight = weight_left;
             if edge.id == last_edge_of_cycle.id {
-                let weight_of_one_cycle = former_weight - weight;
+                let mut weight_of_one_cycle = 0;
+                if former_weight != weight {
+                    weight_of_one_cycle = former_weight - weight;
+                } else {
+                    weight_of_one_cycle = 1;
+                }
                 let entire_rounds = former_weight / weight_of_one_cycle;
                 let mut copied_cycle = one_cycle.clone();
                 more_than_one_round = true;
