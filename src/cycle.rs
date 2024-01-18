@@ -99,8 +99,8 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
                 more_than_one_round = true;
                 for _ in 0..entire_rounds {
                     for _ in 0..copied_cycle.len() {
-                        let mut element = copied_cycle.pop_front().unwrap();
-                        long_cycle.push_back(element);
+                        let element = copied_cycle.pop_front().unwrap();
+                        long_cycle.push_back(element.clone());
                         copied_cycle.push_back(element);
                     }
                 }
@@ -130,7 +130,7 @@ pub fn find_longest_subwalk(one_cycle: &mut VecDeque<Edge>, mut weight_left: Wei
     i:usize, i2:usize, cycle: &Vec<Edge>, extra_weight_of_paths: &mut Vec<Weight>) 
     -> (usize, Weight, Weight) {
 
-    let mut more_than_one_round = false;
+    //let mut more_than_one_round = false;
     let mut long_cycle : VecDeque<Edge> = VecDeque::new();
 
     // If there are no edges in our current path, reinitialize the variables
