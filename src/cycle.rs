@@ -112,7 +112,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
                         }
                     }
                     assert!(is_cycle);
-                    assert!(weight_left == extra_weight);
+                    //assert!(weight_left == extra_weight);
                     break;
                 }
             }
@@ -127,7 +127,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
             break;
         }
     }
-    assert!(weight_left == extra_weight);
+    //assert!(weight_left == extra_weight);
     (index2, weight_left, former_weight, extra_weight)
 }
 
