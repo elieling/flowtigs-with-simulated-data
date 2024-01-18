@@ -51,12 +51,12 @@ fn step (index: usize, weight: Weight, neighbor_weights: &mut [Weight])
 // Function that calculates the longest subwalk starting from a particular edge.
 // Returns a String of the longest path starting from the node.
 fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: Weight, 
-    mut former_weight: Weight, neighbor_weights: &mut [Weight], one_cycle: &mut VecDeque<Edge>, more_than_one_round: bool, long_cycle: &mut VecDeque<Edge>) 
+    mut former_weight: Weight, neighbor_weights: &mut [Weight], one_cycle: &mut VecDeque<Edge>, long_cycle: &mut VecDeque<Edge>) 
     -> (EdgeId, Weight, Weight, Weight, bool) {
 
     // let mut longest_path = sequence; 
     let mut index2 = index2;
-    let mut more_than_one_round = more_than_one_round;
+    let mut more_than_one_round = false;
 
     // We are storing the first edge of our path as well as the last possible potential edge
     let original_edge = &cycle[index1];
@@ -154,7 +154,7 @@ pub fn find_longest_subwalk(one_cycle: &mut VecDeque<Edge>, mut weight_left: Wei
 
     // Finding the longest path in our cycle starting with index i
     let (index2, weight_left, former_weight, extra_weight, more_than_one_round) = longest_subwalk(cycle, i, i2, weight_left, 
-        former_weight, neighbor_weights, one_cycle, mut more_than_one_round, &mut long_cycle);
+        former_weight, neighbor_weights, one_cycle, &mut long_cycle);
 
     // safe_paths.push(walk);
     if !more_than_one_round {
