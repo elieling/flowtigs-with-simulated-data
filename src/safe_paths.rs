@@ -106,7 +106,7 @@ pub fn safe_paths(path: &str, k: usize, mut meter: Option<&mut MemoryMeter>) -> 
             for i in 0..(cycle.len()) {
                 (i2, weight_left, former_weight) = find_longest_subwalk(&mut one_cycle, weight_left, 
                     former_weight, &mut neighbor_weights, &mut safe_edge_paths, 
-                    i, i2, &cycle, &mut extra_weight_of_paths);
+                    i, i2, &cycle, &mut extra_weight_of_paths, &edgelist);
             
             } 
         }

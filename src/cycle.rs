@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use crate::Edge;
 use crate::edge::EdgeId;
 use crate::edge::Weight;
+use crate::graph::Edgelist;
 // use crate::graph::Edgelist;
 
 
@@ -51,11 +52,12 @@ fn step (index: usize, weight: Weight, neighbor_weights: &mut [Weight])
 // Function that calculates the longest subwalk starting from a particular edge.
 // Returns a String of the longest path starting from the node.
 fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: Weight, 
-    mut former_weight: Weight, neighbor_weights: &mut [Weight], one_cycle: &mut VecDeque<Edge>) 
-    -> (EdgeId, Weight, Weight, Weight) {
+    mut former_weight: Weight, neighbor_weights: &mut [Weight], one_cycle: &mut VecDeque<Edge>, edgelist: &Edgelist, prohibited_cycle: bool) 
+    -> (EdgeId, Weight, Weight, Weight, bool) {
 
     // let mut longest_path = sequence; 
     let mut index2 = index2;
+    let mut prohibited_cycle = prohibited_cycle;
 
     // We are storing the first edge of our path as well as the last possible potential edge
     let original_edge = &cycle[index1];
@@ -97,21 +99,18 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
             if edge.id == index1 {
                 if former_weight == weight_left {
                     let mut is_cycle = true;
-                    for i in 0..one_cycle.len() {
-                        if neighbor_weights[i] > 0 {
+                    for edge in one_cycle.clone() {
+                        if edgelist[edge.id].len() > 1 {
                             is_cycle = false;
                         }
                     }
-                    assert!(is_cycle);
+                    //assert!(is_cycle);
+                    if is_cycle {
+                        println!("There is one cycle");
+                        prohibited_cycle = true;
+                    }
                     index2 = get_former_index(index2, cycle);
                     one_cycle.pop_back();
-                    let mut is_cycle = true;
-                    for i in 0..one_cycle.len() {
-                        if neighbor_weights[i] > 0 {
-                            is_cycle = false;
-                        }
-                    }
-                    assert!(is_cycle);
                     //assert!(weight_left == extra_weight);
                     break;
                 }
@@ -128,7 +127,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
         }
     }
     //assert!(weight_left == extra_weight);
-    (index2, weight_left, former_weight, extra_weight)
+    (index2, weight_left, former_weight, extra_weight, prohibited_cycle)
 }
 
 
@@ -138,7 +137,7 @@ fn longest_subwalk(cycle: &Vec<Edge>, index1: EdgeId, index2: EdgeId, weight: We
 // Function that finds the longest safe path in a cycle starting from a certain node
 pub fn find_longest_subwalk(one_cycle: &mut VecDeque<Edge>, mut weight_left: Weight, 
     former_weight: Weight, neighbor_weights: &mut [Weight], safe_edge_paths: &mut Vec<VecDeque<Edge>>, 
-    i:usize, i2:usize, cycle: &Vec<Edge>, extra_weight_of_paths: &mut Vec<Weight>) 
+    i:usize, i2:usize, cycle: &Vec<Edge>, extra_weight_of_paths: &mut Vec<Weight>, edgelist: &Edgelist) 
     -> (usize, Weight, Weight) {
 
 
@@ -160,13 +159,16 @@ pub fn find_longest_subwalk(one_cycle: &mut VecDeque<Edge>, mut weight_left: Wei
         one_cycle.pop_front();
     }
 
+    let prohibited_cycle = false;
 
     // Finding the longest path in our cycle starting with index i
-    let (index2, weight_left, former_weight, extra_weight) = longest_subwalk(cycle, i, i2, weight_left, 
-        former_weight, neighbor_weights, one_cycle);
+    let (index2, weight_left, former_weight, extra_weight, prohibited_cycle) = longest_subwalk(cycle, i, i2, weight_left, 
+        former_weight, neighbor_weights, one_cycle, edgelist, prohibited_cycle);
 
     // safe_paths.push(walk);
-    safe_edge_paths.push(one_cycle.clone());
+    if !prohibited_cycle {
+        safe_edge_paths.push(one_cycle.clone());
+    }
     extra_weight_of_paths.push(extra_weight);
     (index2, weight_left, former_weight)
 }
