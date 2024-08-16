@@ -1,6 +1,6 @@
 # Flowtigs
 
-An algorithm for calculating flowtigs in a De Bruijn graph of DNA reads in metagenomes.
+An algorithm for calculating [flowtigs](https://www.biorxiv.org/content/10.1101/2023.11.17.567499v1) in a De Bruijn graph of DNA reads in metagenomes. This version takes an edge-centric graph as input, and works only if the flow condition holds in the graph, i.e., if the graph is built with perfect data. To compute flowtigs of real data and from reads or a node-centric graph, see [this version](https://github.com/elieling/flowtigs).
 
 ## Input
 
